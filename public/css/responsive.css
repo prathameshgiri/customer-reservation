@@ -1,0 +1,268 @@
+/* ============================================================
+   ReserveEase - Responsive Stylesheet
+   Complete cross-device styling (Mobile, Tablet, Laptop, Desktop)
+   ============================================================ */
+
+/* Large screens & Standard Laptops (max-width: 1200px) */
+@media (max-width: 1200px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .page-content {
+        padding: 20px 16px;
+    }
+
+    table th, table td {
+        padding: 10px 8px;
+    }
+}
+
+/* Tablet & Smaller Laptops (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: var(--sidebar-width);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .mobile-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+
+    .mobile-overlay.active {
+        display: block;
+    }
+
+    .services-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-content h1 {
+        font-size: 2.2rem;
+    }
+}
+
+/* Mobile & Small Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+    .page-content {
+        padding: 16px 12px;
+    }
+
+    .top-header {
+        padding: 0 14px;
+        height: 56px;
+    }
+
+    .page-title {
+        font-size: 0.95rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-info .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .main-content {
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .filter-toolbar .search-box,
+    .filter-toolbar select,
+    .filter-toolbar input[type="date"],
+    .filter-toolbar button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+        flex-wrap: wrap;
+    }
+
+    .search-box input {
+        width: 100%;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome-banner {
+        padding: 20px 16px;
+    }
+
+    .welcome-banner h2 {
+        font-size: 1.15rem;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .toast {
+        min-width: auto;
+        max-width: calc(100% - 24px);
+    }
+
+    .modal {
+        max-width: calc(100% - 20px);
+        margin: 10px auto;
+    }
+
+    .modal-content {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .auth-container {
+        padding: 28px 20px;
+    }
+
+    .auth-logo h1 {
+        font-size: 1.3rem;
+    }
+
+    .table-container {
+        font-size: 0.8rem;
+    }
+
+    table th, table td {
+        padding: 9px 6px;
+    }
+
+    .landing-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .landing-content p {
+        font-size: 1rem;
+    }
+
+    .landing-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-header {
+        padding: 14px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .card-body {
+        padding: 14px;
+    }
+
+    .booking-summary {
+        padding: 14px;
+    }
+}
+
+/* Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .page-title {
+        font-size: 0.88rem;
+    }
+
+    .tabs {
+        overflow-x: auto;
+    }
+
+    .tab {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .auth-container {
+        padding: 24px 16px;
+    }
+
+    .receipt {
+        padding: 16px;
+    }
+
+    .top-header {
+        padding: 0 10px;
+    }
+}

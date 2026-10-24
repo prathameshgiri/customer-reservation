@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create your ReserveEase account and start booking services">
+    <title>Register - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-container">
+            <div class="auth-logo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <h1>Create Account</h1>
+                <p>Join ReserveEase and start booking</p>
+            </div>
+
+            <form class="auth-form" id="registerForm" novalidate>
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Mobile Number</label>
+                    <div class="input-wrapper">
+                        <input type="tel" id="phone" name="phone" placeholder="10-digit mobile number" required maxlength="10">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Min. 6 chars, 1 letter & 1 number" required>
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter your password" required>
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="registerBtn">
+                    <i class="fa-solid fa-user-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login.html">Sign In</a></p>
+                <p style="margin-top: 10px;"><a href="/" style="color: var(--gray-400); font-weight: 400;"><i class="fa-solid fa-arrow-left"></i> Back to Home</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        initAuthPage();
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Creating account...';
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Client-side validation
+            if (!fullName || !email || !phone || !password || !confirmPassword) {
+                showToast('Please fill in all fields', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account';
+                return;
+            }
+
+            const res = await API.post('/auth/register', { fullName, email, phone, password, confirmPassword });
+
+            if (res.ok && res.data.success) {
+                showToast('Registration successful! Redirecting to login...', 'success');
+                setTimeout(() => window.location.href = '/login.html', 1500);
+            } else {
+                showToast(res.data.message || 'Registration failed', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management - ReserveEase Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="logo-text">ReserveEase <span>Admin Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="/admin/dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="nav-text">Dashboard</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <a href="/admin/reservations.html" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Reservations</span></a>
+                    <a href="/admin/services.html" class="nav-link"><i class="fa-solid fa-bell-concierge"></i><span class="nav-text">Services & Slots</span></a>
+                    <a href="/admin/customers.html" class="nav-link active"><i class="fa-solid fa-users"></i><span class="nav-text">Customers</span></a>
+                    <a href="/admin/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="/admin/settings.html" class="nav-link"><i class="fa-solid fa-sliders"></i><span class="nav-text">Settings</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar" style="background: var(--primary-600); color: #fff;">A</div>
+                    <div class="sidebar-user-info"><div class="name">Administrator</div><div class="role">admin</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Registered Customers</h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-outline btn-sm" onclick="loadCustomers()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="searchInput" placeholder="Search customer by name, email, or phone...">
+                        </div>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="all">All Accounts</option>
+                            <option value="active">Active Accounts</option>
+                            <option value="inactive">Deactivated Accounts</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Customer Table Card -->
+                <div class="card">
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container" id="customersTable">
+                            <div class="loading-spinner"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Customer Details Modal -->
+    <div class="modal" id="customerDetailModal">
+        <div class="modal-content" style="max-width: 750px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-user"></i> Customer Profile & Booking History</h3>
+                <button class="modal-close" onclick="closeModal('customerDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="customerModalBody">
+                <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('customerDetailModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let allCustomers = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            const user = await checkAuth('admin');
+            if (!user) return;
+            loadCustomers();
+
+            document.getElementById('searchInput').addEventListener('input', debounce(filterCustomers, 250));
+            document.getElementById('statusFilter').addEventListener('change', filterCustomers);
+        });
+
+        async function loadCustomers() {
+            try {
+                const res = await API.get('/admin/customers');
+                if (res.success) {
+                    allCustomers = res.customers || [];
+                    filterCustomers();
+                } else {
+                    document.getElementById('customersTable').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h3>Failed to load customers</h3>
+                            <p>${res.message || 'Error occurred.'}</p>
+                        </div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('customersTable').innerHTML = '<div class="alert alert-danger">Error fetching customer list.</div>';
+            }
+        }
+
+        function filterCustomers() {
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const status = document.getElementById('statusFilter').value;
+
+            let filtered = allCustomers;
+
+            if (search) {
+                filtered = filtered.filter(c =>
+                    (c.fullName && c.fullName.toLowerCase().includes(search)) ||
+                    (c.email && c.email.toLowerCase().includes(search)) ||
+                    (c.phone && c.phone.includes(search))
+                );
+            }
+
+            if (status === 'active') {
+                filtered = filtered.filter(c => c.isActive);
+            } else if (status === 'inactive') {
+                filtered = filtered.filter(c => !c.isActive);
+            }
+
+            renderCustomers(filtered);
+        }
+
+        function renderCustomers(list) {
+            const container = document.getElementById('customersTable');
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-user-slash"></i>
+                        <h3>No Customers Found</h3>
+                        <p>No customer accounts match your current search query or filter.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Contact</th>
+                            <th>Total Bookings</th>
+                            <th>Account Status</th>
+                            <th>Joined Date</th>
+                            <th class="actions-col" style="min-width: 140px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            list.forEach(c => {
+                const statusBadge = c.isActive
+                    ? `<span class="badge badge-success"><span class="dot-indicator active"></span> Active</span>`
+                    : `<span class="badge badge-danger"><span class="dot-indicator inactive"></span> Deactivated</span>`;
+
+                html += `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--primary-100); color: var(--primary-700); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                                    ${getInitials(c.fullName)}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: var(--gray-900);">${c.fullName}</div>
+                                    <div style="font-size: 0.8rem; color: var(--gray-500);">${c.email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.88rem; color: var(--gray-800);"><i class="fa-solid fa-phone" style="font-size: 0.75rem; color: var(--gray-400); margin-right: 4px;"></i> ${c.phone}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-info" style="font-size: 0.82rem;">${c.totalReservations || 0} reservation(s)</span>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td style="font-size: 0.85rem; color: var(--gray-600);">${formatDate(c.createdAt)}</td>
+                        <td class="actions-cell" style="white-space: nowrap; min-width: 140px; text-align: center;">
+                            <div class="table-actions">
+                                <button class="btn btn-outline btn-sm" onclick="viewCustomerDetails('${c.id}')" title="View History">
+                                    <i class="fa-solid fa-eye"></i> Details
+                                </button>
+                                <button class="btn ${c.isActive ? 'btn-danger' : 'btn-success'} btn-sm btn-icon-only" onclick="toggleCustomerStatus('${c.id}', ${c.isActive})" title="${c.isActive ? 'Deactivate Customer' : 'Activate Customer'}">
+                                    <i class="fa-solid ${c.isActive ? 'fa-user-xmark' : 'fa-user-check'}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        async function viewCustomerDetails(customerId) {
+            openModal('customerDetailModal');
+            const body = document.getElementById('customerModalBody');
+            body.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+            try {
+                const res = await API.get(`/admin/customers/${customerId}`);
+                if (!res.success) {
+                    body.innerHTML = `<div class="alert alert-danger">${res.message || 'Failed to load details'}</div>`;
+                    return;
+                }
+
+                const { customer, reservations, payments } = res;
+                const totalPaid = (payments || [])
+                    .filter(p => p.paymentStatus === 'Paid')
+                    .reduce((sum, p) => sum + p.amount, 0);
+
+                let resRows = '';
+                if (reservations && reservations.length > 0) {
+                    reservations.forEach(r => {
+                        resRows += `
+                            <tr>
+                                <td style="font-family: monospace; font-weight: 600; color: var(--primary-700);">${r.bookingId}</td>
+                                <td>${r.serviceName}</td>
+                                <td>${r.reservationDate} (${r.timeSlot})</td>
+                                <td>${formatCurrency(r.totalAmount)}</td>
+                                <td>${getStatusBadge(r.reservationStatus)}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    resRows = `<tr><td colspan="5" style="text-align: center; color: var(--gray-500); padding: 16px;">No reservations made yet.</td></tr>`;
+                }
+
+                body.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; background: var(--gray-50); padding: 16px; border-radius: 10px; margin-bottom: 20px;">
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Full Name</span>
+                            <strong style="color: var(--gray-900); font-size: 1rem;">${customer.fullName}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Email</span>
+                            <strong style="color: var(--gray-900); font-size: 0.95rem;">${customer.email}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Mobile</span>
+                            <strong style="color: var(--gray-900); font-size: 0.95rem;">${customer.phone}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Total Paid</span>
+                            <strong style="color: var(--success-700); font-size: 1.05rem;">${formatCurrency(totalPaid)}</strong>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; color: var(--gray-800);">Reservation History</h4>
+                    <div class="table-container" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--gray-200); border-radius: 8px;">
+                        <table class="data-table" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Service</th>
+                                    <th>Date/Time</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${resRows}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                console.error(err);
+                body.innerHTML = '<div class="alert alert-danger">Error retrieving customer records.</div>';
+            }
+        }
+
+        async function toggleCustomerStatus(customerId, currentStatus) {
+            const actionText = currentStatus ? 'deactivate' : 'activate';
+            const confirmed = await confirmModal(
+                `Are you sure you want to ${actionText} this customer account?`,
+                `${currentStatus ? 'Deactivating will prevent this user from logging in or booking.' : 'Activating will restore full booking access.'}`
+            );
+
+            if (!confirmed) return;
+
+            try {
+                const res = await API.patch(`/admin/customers/${customerId}/status`, {
+                    isActive: !currentStatus
+                });
+
+                if (res.success) {
+                    showToast(res.message || `Customer ${actionText}d successfully!`, 'success');
+                    loadCustomers();
+                } else {
+                    showToast(res.message || `Failed to ${actionText} customer`, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while updating customer status', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

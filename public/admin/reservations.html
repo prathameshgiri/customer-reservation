@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Management - ReserveEase Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="logo-text">ReserveEase <span>Admin Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="/admin/dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="nav-text">Dashboard</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <a href="/admin/reservations.html" class="nav-link active"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Reservations</span></a>
+                    <a href="/admin/services.html" class="nav-link"><i class="fa-solid fa-bell-concierge"></i><span class="nav-text">Services & Slots</span></a>
+                    <a href="/admin/customers.html" class="nav-link"><i class="fa-solid fa-users"></i><span class="nav-text">Customers</span></a>
+                    <a href="/admin/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="/admin/settings.html" class="nav-link"><i class="fa-solid fa-sliders"></i><span class="nav-text">Settings</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar" style="background: var(--primary-600); color: #fff;">A</div>
+                    <div class="sidebar-user-info"><div class="name">Administrator</div><div class="role">admin</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Reservation Master Records</h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-outline btn-sm" onclick="loadReservations()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Filter Toolbar -->
+                <div class="filter-toolbar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search booking ID, customer name, email...">
+                    </div>
+                    <select id="statusFilter">
+                        <option value="all">All Reservation Statuses</option>
+                        <option value="Pending">Pending Approval</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <select id="paymentFilter">
+                        <option value="all">All Payment Statuses</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Payment Pending</option>
+                    </select>
+                    <input type="date" id="dateFilter" title="Filter by reservation date">
+                    <button class="btn btn-outline btn-sm" onclick="resetFilters()"><i class="fa-solid fa-filter-circle-xmark"></i> Reset</button>
+                </div>
+
+                <!-- Table Card -->
+                <div class="card">
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container" id="reservationsTable">
+                            <div class="loading-spinner"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Booking Details Modal -->
+    <div class="modal" id="reservationModal">
+        <div class="modal-content" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-calendar-check"></i> Reservation Full Details</h3>
+                <button class="modal-close" onclick="closeModal('reservationModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="reservationModalBody">
+                <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+            <div class="modal-footer" id="modalActionsFooter">
+                <button class="btn btn-secondary" onclick="closeModal('reservationModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancellation Reason Modal -->
+    <div class="modal" id="cancelModal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-ban" style="color: var(--danger-600);"></i> Cancel Reservation</h3>
+                <button class="modal-close" onclick="closeModal('cancelModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cancelReservationId">
+                <div class="form-group">
+                    <label class="form-label" for="cancelReason">Reason for Cancellation *</label>
+                    <textarea id="cancelReason" class="form-control" rows="3" required placeholder="Specify reason (e.g. Schedule conflict, Customer requested cancellation, Maintenance)..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('cancelModal')">Back</button>
+                <button class="btn btn-danger" onclick="submitCancellation()"><i class="fa-solid fa-xmark"></i> Confirm Cancellation</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            const user = await checkAuth('admin');
+            if (!user) return;
+
+            // Check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('status')) {
+                document.getElementById('statusFilter').value = urlParams.get('status');
+            }
+            if (urlParams.get('search')) {
+                document.getElementById('searchInput').value = urlParams.get('search');
+            }
+
+            loadReservations();
+
+            document.getElementById('searchInput').addEventListener('input', debounce(loadReservations, 300));
+            document.getElementById('statusFilter').addEventListener('change', loadReservations);
+            document.getElementById('paymentFilter').addEventListener('change', loadReservations);
+            document.getElementById('dateFilter').addEventListener('change', loadReservations);
+        });
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('paymentFilter').value = 'all';
+            document.getElementById('dateFilter').value = '';
+            loadReservations();
+        }
+
+        async function loadReservations() {
+            const search = document.getElementById('searchInput').value.trim();
+            const status = document.getElementById('statusFilter').value;
+            const paymentStatus = document.getElementById('paymentFilter').value;
+            const date = document.getElementById('dateFilter').value;
+
+            let query = '/admin/reservations?';
+            if (search) query += `search=${encodeURIComponent(search)}&`;
+            if (status !== 'all') query += `status=${encodeURIComponent(status)}&`;
+            if (paymentStatus !== 'all') query += `paymentStatus=${encodeURIComponent(paymentStatus)}&`;
+            if (date) query += `dateFrom=${date}&dateTo=${date}&`;
+
+            try {
+                const res = await API.get(query);
+                if (res.success) {
+                    renderReservations(res.reservations || []);
+                } else {
+                    document.getElementById('reservationsTable').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h3>Failed to load reservations</h3>
+                            <p>${res.message || 'Error occurred.'}</p>
+                        </div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('reservationsTable').innerHTML = '<div class="alert alert-danger">Error retrieving reservations.</div>';
+            }
+        }
+
+        function renderReservations(list) {
+            const container = document.getElementById('reservationsTable');
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                        <h3>No Reservations Found</h3>
+                        <p>No bookings match your current search and filter settings.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Date & Time</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th class="actions-col" style="min-width: 105px; width: 105px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            list.forEach(r => {
+                const resBadge = getStatusBadge(r.reservationStatus);
+                const payBadge = getStatusBadge(r.paymentStatus);
+
+                let actionBtns = `
+                    <button class="btn btn-outline btn-sm btn-icon-only" onclick="viewReservation('${r.id}')" title="Full Details">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                `;
+
+                if (r.reservationStatus === 'Pending') {
+                    actionBtns += `
+                        <button class="btn btn-success btn-sm btn-icon-only" onclick="updateStatus('${r.id}', 'Confirmed')" title="Confirm Booking">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    `;
+                }
+
+                if (r.reservationStatus === 'Confirmed') {
+                    actionBtns += `
+                        <button class="btn btn-primary btn-sm btn-icon-only" onclick="updateStatus('${r.id}', 'Completed')" title="Mark Completed">
+                            <i class="fa-solid fa-flag-checkered"></i>
+                        </button>
+                    `;
+                }
+
+                if (['Pending', 'Confirmed'].includes(r.reservationStatus)) {
+                    actionBtns += `
+                        <button class="btn btn-danger btn-sm btn-icon-only" onclick="openCancelModal('${r.id}')" title="Cancel Booking">
+                            <i class="fa-solid fa-ban"></i>
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <tr>
+                        <td style="white-space: nowrap;">
+                            <strong style="color: var(--primary-700); font-family: monospace; font-size: 0.9rem;">${r.bookingId}</strong>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--gray-900); font-size: 0.88rem;">${r.customerName}</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);">${r.customerEmail || ''}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--gray-800); font-size: 0.88rem;">${r.serviceName}</div>
+                            <span class="badge badge-info" style="font-size: 0.72rem;">${r.serviceCategory || ''}</span>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.86rem; font-weight: 600; color: var(--gray-900);">${r.reservationDate}</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);"><i class="fa-solid fa-clock" style="font-size: 0.7rem;"></i> ${r.timeSlot}</div>
+                        </td>
+                        <td style="font-weight: 600; color: var(--gray-800); text-align: center;">${r.quantity}</td>
+                        <td style="font-weight: 800; color: var(--gray-900);">${formatCurrency(r.totalAmount)}</td>
+                        <td>${resBadge}</td>
+                        <td>${payBadge}</td>
+                        <td class="actions-cell" style="white-space: nowrap; min-width: 105px; width: 105px; text-align: center;">
+                            <div class="table-actions">
+                                ${actionBtns}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        async function viewReservation(id) {
+            openModal('reservationModal');
+            const body = document.getElementById('reservationModalBody');
+            const footer = document.getElementById('modalActionsFooter');
+            body.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+            if (footer) footer.innerHTML = '<button class="btn btn-secondary" onclick="closeModal(\'reservationModal\')">Close</button>';
+
+            try {
+                const res = await API.get(`/admin/reservations/${id}`);
+                if (!res.success) {
+                    body.innerHTML = `<div class="alert alert-danger">${res.message || 'Unable to fetch reservation details'}</div>`;
+                    return;
+                }
+
+                const r = res.reservation;
+                body.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); padding-bottom: 12px; margin-bottom: 16px;">
+                        <div>
+                            <span style="font-size: 0.8rem; color: var(--gray-500); text-transform: uppercase;">Booking Reference</span>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: var(--primary-700); font-family: monospace;">${r.bookingId}</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            ${getStatusBadge(r.reservationStatus)}
+                            ${getStatusBadge(r.paymentStatus)}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-2" style="gap: 16px; margin-bottom: 16px;">
+                        <div style="background: var(--gray-50); padding: 14px; border-radius: 8px;">
+                            <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-500); margin-bottom: 8px;"><i class="fa-solid fa-user"></i> Customer Info</h4>
+                            <div style="font-weight: 700; color: var(--gray-900); font-size: 1rem;">${r.customerName}</div>
+                            <div style="font-size: 0.85rem; color: var(--gray-600);"><i class="fa-solid fa-envelope" style="font-size: 0.75rem; margin-right: 4px;"></i> ${r.customerEmail}</div>
+                            <div style="font-size: 0.85rem; color: var(--gray-600);"><i class="fa-solid fa-phone" style="font-size: 0.75rem; margin-right: 4px;"></i> ${r.customerPhone || 'N/A'}</div>
+                        </div>
+
+                        <div style="background: var(--gray-50); padding: 14px; border-radius: 8px;">
+                            <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-500); margin-bottom: 8px;"><i class="fa-solid fa-calendar"></i> Service & Schedule</h4>
+                            <div style="font-weight: 700; color: var(--gray-900); font-size: 1rem;">${r.serviceName}</div>
+                            <div style="font-size: 0.85rem; color: var(--gray-600);">Date: <strong>${r.reservationDate}</strong></div>
+                            <div style="font-size: 0.85rem; color: var(--gray-600);">Slot: <strong>${r.timeSlot}</strong></div>
+                            <div style="font-size: 0.85rem; color: var(--gray-600);">Quantity: <strong>${r.quantity} pax</strong></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #ffffff; border: 1px solid var(--gray-200); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+                            <span style="color: var(--gray-600);">Unit Price:</span>
+                            <span style="font-weight: 600;">${formatCurrency(r.unitPrice)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+                            <span style="color: var(--gray-600);">Quantity Booked:</span>
+                            <span style="font-weight: 600;">${r.quantity}</span>
+                        </div>
+                        <div style="border-top: 1px solid var(--gray-200); padding-top: 8px; display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 800; color: var(--gray-900);">
+                            <span>Total Amount:</span>
+                            <span style="color: var(--primary-700);">${formatCurrency(r.totalAmount)}</span>
+                        </div>
+                    </div>
+
+                    ${r.specialInstructions ? `
+                        <div style="background: var(--info-50); border-left: 4px solid var(--info-500); padding: 10px 14px; border-radius: 4px; margin-bottom: 16px; font-size: 0.85rem; color: var(--gray-800);">
+                            <strong>Special Instructions:</strong> ${escapeHtml(r.specialInstructions)}
+                        </div>
+                    ` : ''}
+
+                    ${r.cancellationReason ? `
+                        <div style="background: var(--danger-50); border-left: 4px solid var(--danger-500); padding: 10px 14px; border-radius: 4px; margin-bottom: 16px; font-size: 0.85rem; color: var(--danger-700);">
+                            <strong>Cancellation Reason:</strong> ${escapeHtml(r.cancellationReason)}
+                        </div>
+                    ` : ''}
+                `;
+
+                if (footer) {
+                    let footerBtns = `<button class="btn btn-secondary" onclick="closeModal('reservationModal')">Close</button>`;
+                    if (r.reservationStatus === 'Pending') {
+                        footerBtns = `
+                            <button class="btn btn-success" onclick="closeModal('reservationModal'); updateStatus('${r.id}', 'Confirmed');">
+                                <i class="fa-solid fa-check"></i> Confirm Booking
+                            </button>
+                            <button class="btn btn-danger" onclick="closeModal('reservationModal'); openCancelModal('${r.id}');">
+                                <i class="fa-solid fa-ban"></i> Cancel Booking
+                            </button>
+                            <button class="btn btn-secondary" onclick="closeModal('reservationModal')">Close</button>
+                        `;
+                    } else if (r.reservationStatus === 'Confirmed') {
+                        footerBtns = `
+                            <button class="btn btn-primary" onclick="closeModal('reservationModal'); updateStatus('${r.id}', 'Completed');">
+                                <i class="fa-solid fa-flag-checkered"></i> Mark Completed
+                            </button>
+                            <button class="btn btn-danger" onclick="closeModal('reservationModal'); openCancelModal('${r.id}');">
+                                <i class="fa-solid fa-ban"></i> Cancel Booking
+                            </button>
+                            <button class="btn btn-secondary" onclick="closeModal('reservationModal')">Close</button>
+                        `;
+                    }
+                    footer.innerHTML = footerBtns;
+                }
+            } catch (err) {
+                console.error(err);
+                body.innerHTML = '<div class="alert alert-danger">Error loading reservation.</div>';
+            }
+        }
+
+        async function updateStatus(id, newStatus) {
+            const confirmed = await confirmModal(
+                `Update status to "${newStatus}"?`,
+                `This action will update the booking status in the system and will reflect immediately in the customer account.`,
+                'Confirm',
+                newStatus === 'Confirmed' ? 'success' : 'primary'
+            );
+
+            if (!confirmed) return;
+
+            try {
+                const res = await API.patch(`/admin/reservations/${id}/status`, { status: newStatus });
+                if (res.success) {
+                    showToast(`Reservation marked as ${newStatus}!`, 'success');
+                    loadReservations();
+                } else {
+                    showToast(res.message || 'Status update failed', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error during status update', 'error');
+            }
+        }
+
+        function openCancelModal(id) {
+            document.getElementById('cancelReservationId').value = id;
+            document.getElementById('cancelReason').value = '';
+            openModal('cancelModal');
+        }
+
+        async function submitCancellation() {
+            const id = document.getElementById('cancelReservationId').value;
+            const reason = document.getElementById('cancelReason').value.trim();
+
+            if (!reason) {
+                showToast('Please provide a reason for cancelling this booking', 'warning');
+                return;
+            }
+
+            try {
+                const res = await API.patch(`/admin/reservations/${id}/status`, {
+                    status: 'Cancelled',
+                    reason
+                });
+
+                if (res.success) {
+                    showToast('Reservation cancelled successfully!', 'success');
+                    closeModal('cancelModal');
+                    loadReservations();
+                } else {
+                    showToast(res.message || 'Failed to cancel reservation', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error during cancellation', 'error');
+            }
+        }
+
+        function escapeHtml(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

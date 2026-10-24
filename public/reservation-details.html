@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Details - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="logo-text">ReserveEase <span>Customer Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <a href="/customer-dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span></a>
+                    <a href="/services.html" class="nav-link"><i class="fa-solid fa-concierge-bell"></i><span class="nav-text">Browse Services</span></a>
+                    <a href="/booking.html" class="nav-link"><i class="fa-solid fa-plus-circle"></i><span class="nav-text">Make Reservation</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">My Account</div>
+                    <a href="/my-reservations.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span class="nav-text">My Reservations</span></a>
+                    <a href="/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                    <a href="/profile.html" class="nav-link"><i class="fa-solid fa-user-gear"></i><span class="nav-text">Profile</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar">U</div>
+                    <div class="sidebar-user-info"><div class="name">User</div><div class="role">customer</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Reservation Details</h1>
+                </div>
+                <div class="header-right">
+                    <a href="/my-reservations.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back</a>
+                </div>
+            </header>
+            <div class="page-content" id="pageContent">
+                <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-credit-card"></i> Process Payment</h3>
+                <button class="modal-close" onclick="closeModal('paymentModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="demo-notice">
+                    <i class="fa-solid fa-info-circle"></i> This is a demo payment simulation. No real money will be charged.
+                </div>
+                <p style="margin: 16px 0; font-size: 0.95rem;">Amount: <strong id="paymentAmount"></strong></p>
+                <label style="font-weight:600;font-size:0.85rem;color:var(--gray-700);display:block;margin-bottom:12px;">Select Payment Method:</label>
+                <div class="payment-methods" id="paymentMethods">
+                    <div class="payment-method-card" data-method="Cash" onclick="selectPaymentMethod(this)">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                        <div class="method-name">Cash</div>
+                    </div>
+                    <div class="payment-method-card" data-method="Card" onclick="selectPaymentMethod(this)">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <div class="method-name">Card</div>
+                    </div>
+                    <div class="payment-method-card" data-method="UPI" onclick="selectPaymentMethod(this)">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                        <div class="method-name">UPI</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
+                <button class="btn btn-success" id="processPaymentBtn" onclick="processPayment()" disabled>
+                    <i class="fa-solid fa-lock"></i> Pay Now (Demo)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let currentReservation = null;
+        let selectedMethod = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            await checkAuth('customer');
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) {
+                window.location.href = '/my-reservations.html';
+                return;
+            }
+            loadDetails(id);
+        });
+
+        async function loadDetails(id) {
+            const res = await API.get(`/reservations/${id}`);
+            if (!res.ok || !res.data.success) {
+                showToast('Reservation not found', 'error');
+                setTimeout(() => window.location.href = '/my-reservations.html', 1000);
+                return;
+            }
+
+            currentReservation = res.data.reservation;
+            renderDetails();
+        }
+
+        function renderDetails() {
+            const r = currentReservation;
+            const content = document.getElementById('pageContent');
+
+            const canCancel = ['Pending', 'Confirmed'].includes(r.reservationStatus);
+            const canPay = r.paymentStatus !== 'Paid' && r.reservationStatus !== 'Cancelled';
+
+            content.innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-ticket"></i> Booking Information</h3>
+                            ${getStatusBadge(r.reservationStatus)}
+                        </div>
+                        <div class="card-body">
+                            <div class="detail-grid">
+                                <div class="detail-item"><div class="detail-label">Booking ID</div><div class="detail-value">${r.bookingId}</div></div>
+                                <div class="detail-item"><div class="detail-label">Service</div><div class="detail-value">${r.serviceName}</div></div>
+                                <div class="detail-item"><div class="detail-label">Category</div><div class="detail-value">${r.serviceCategory}</div></div>
+                                <div class="detail-item"><div class="detail-label">Reservation Date</div><div class="detail-value">${formatDate(r.reservationDate)}</div></div>
+                                <div class="detail-item"><div class="detail-label">Time Slot</div><div class="detail-value">${formatTime(r.timeSlot)}</div></div>
+                                <div class="detail-item"><div class="detail-label">Quantity</div><div class="detail-value">${r.quantity}</div></div>
+                                <div class="detail-item"><div class="detail-label">Unit Price</div><div class="detail-value">${formatCurrency(r.unitPrice)}</div></div>
+                                <div class="detail-item"><div class="detail-label">Total Amount</div><div class="detail-value" style="font-size:1.1rem;color:var(--primary-700);font-weight:700;">${formatCurrency(r.totalAmount)}</div></div>
+                            </div>
+                            ${r.specialInstructions ? `<div class="detail-item" style="margin-top:12px;"><div class="detail-label">Special Instructions</div><div class="detail-value">${r.specialInstructions}</div></div>` : ''}
+                            ${r.cancellationReason ? `<div class="detail-item" style="margin-top:12px;"><div class="detail-label">Cancellation Reason</div><div class="detail-value text-danger">${r.cancellationReason}</div></div>` : ''}
+                            <div style="margin-top:12px;font-size:0.8rem;color:var(--gray-400);">Booked on: ${formatDateTime(r.createdAt)}</div>
+                        </div>
+                        <div class="card-footer" style="display:flex;gap:10px;">
+                            ${canPay ? `<button class="btn btn-success btn-sm" onclick="openPaymentModal()"><i class="fa-solid fa-credit-card"></i> Make Payment</button>` : ''}
+                            ${canCancel ? `<button class="btn btn-danger btn-sm" onclick="cancelReservation()"><i class="fa-solid fa-xmark"></i> Cancel Booking</button>` : ''}
+                            <button class="btn btn-secondary btn-sm" onclick="printReceipt()"><i class="fa-solid fa-print"></i> Print Receipt</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <!-- Payment Info -->
+                        <div class="card" style="margin-bottom:20px;">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-credit-card"></i> Payment Status</h3>
+                                ${getStatusBadge(r.paymentStatus)}
+                            </div>
+                            <div class="card-body">
+                                ${r.payment ? `
+                                    <div class="detail-grid">
+                                        <div class="detail-item"><div class="detail-label">Payment Ref</div><div class="detail-value">${r.payment.paymentReference}</div></div>
+                                        <div class="detail-item"><div class="detail-label">Method</div><div class="detail-value">${r.payment.paymentMethod}</div></div>
+                                        <div class="detail-item"><div class="detail-label">Amount Paid</div><div class="detail-value">${formatCurrency(r.payment.amount)}</div></div>
+                                        <div class="detail-item"><div class="detail-label">Date</div><div class="detail-value">${formatDateTime(r.payment.createdAt)}</div></div>
+                                    </div>
+                                    ${r.payment.isDemoTransaction ? '<div class="demo-notice" style="margin-top:12px;"><i class="fa-solid fa-info-circle"></i> This is a demo transaction</div>' : ''}
+                                ` : `
+                                    <div class="empty-state" style="padding:24px 0;">
+                                        <i class="fa-solid fa-clock" style="font-size:32px;"></i>
+                                        <p style="margin-top:8px;">${r.reservationStatus === 'Cancelled' ? 'Booking was cancelled' : 'Payment pending'}</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                        <!-- Receipt Preview -->
+                        <div class="card print-area" id="receiptArea">
+                            <div class="card-header"><h3><i class="fa-solid fa-receipt"></i> Booking Receipt</h3></div>
+                            <div class="card-body">
+                                <div class="receipt">
+                                    <div class="receipt-header">
+                                        <h2>ReserveEase</h2>
+                                        <p style="color:var(--gray-400);font-size:0.82rem;">Booking Confirmation Receipt</p>
+                                    </div>
+                                    <div class="receipt-row"><span class="label">Booking ID</span><span class="value">${r.bookingId}</span></div>
+                                    <div class="receipt-row"><span class="label">Service</span><span class="value">${r.serviceName}</span></div>
+                                    <div class="receipt-row"><span class="label">Date</span><span class="value">${formatDate(r.reservationDate)}</span></div>
+                                    <div class="receipt-row"><span class="label">Time</span><span class="value">${formatTime(r.timeSlot)}</span></div>
+                                    <div class="receipt-row"><span class="label">Quantity</span><span class="value">${r.quantity}</span></div>
+                                    <div class="receipt-row"><span class="label">Status</span><span class="value">${r.reservationStatus}</span></div>
+                                    <div class="receipt-row"><span class="label">Payment</span><span class="value">${r.paymentStatus}</span></div>
+                                    <div class="receipt-row receipt-total"><span class="label">Total Amount</span><span class="value">${formatCurrency(r.totalAmount)}</span></div>
+                                    <div class="receipt-footer">
+                                        <p>Thank you for choosing ReserveEase!</p>
+                                        <p style="margin-top:4px;">Generated: ${formatDateTime(new Date().toISOString())}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openPaymentModal() {
+            selectedMethod = null;
+            document.getElementById('paymentAmount').textContent = formatCurrency(currentReservation.totalAmount);
+            document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('processPaymentBtn').disabled = true;
+            openModal('paymentModal');
+        }
+
+        function selectPaymentMethod(card) {
+            document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedMethod = card.dataset.method;
+            document.getElementById('processPaymentBtn').disabled = false;
+        }
+
+        async function processPayment() {
+            if (!selectedMethod) return;
+            const btn = document.getElementById('processPaymentBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div> Processing...';
+
+            const res = await API.post('/payments', {
+                reservationId: currentReservation.id,
+                paymentMethod: selectedMethod
+            });
+
+            if (res.ok && res.data.success) {
+                closeModal('paymentModal');
+                showToast('Payment processed successfully! (Demo)', 'success');
+                loadDetails(currentReservation.id);
+            } else {
+                showToast(res.data.message || 'Payment failed', 'error');
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay Now (Demo)';
+        }
+
+        function cancelReservation() {
+            showConfirm('Cancel Reservation?', `Are you sure you want to cancel booking ${currentReservation.bookingId}?`, async () => {
+                const res = await API.patch(`/reservations/${currentReservation.id}/cancel`, { reason: 'Cancelled by customer' });
+                if (res.ok) {
+                    showToast('Reservation cancelled', 'success');
+                    loadDetails(currentReservation.id);
+                } else {
+                    showToast(res.data.message || 'Failed to cancel', 'error');
+                }
+            });
+        }
+
+        function printReceipt() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

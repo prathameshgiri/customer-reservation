@@ -1,0 +1,19 @@
+{
+  "applicationName": "ReserveEase Pro",
+  "currency": "INR",
+  "currencySymbol": "₹",
+  "cancellationPolicy": "Reservations can be cancelled up to 24 hours before the scheduled time. Late cancellations may be subject to charges.",
+  "contactEmail": "support@reserveease.com",
+  "contactPhone": "+91 98765 43210",
+  "enabledPaymentMethods": [
+    "Cash",
+    "Card",
+    "UPI"
+  ],
+  "bookingTimeRestrictions": {
+    "minAdvanceHours": 2,
+    "maxAdvanceDays": 30
+  },
+  "defaultBookingStatus": "Pending",
+  "updatedAt": "2026-10-23T15:29:37.596Z"
+}

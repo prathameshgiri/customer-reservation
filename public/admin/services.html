@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services & Availability - ReserveEase Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="logo-text">ReserveEase <span>Admin Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="/admin/dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="nav-text">Dashboard</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <a href="/admin/reservations.html" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Reservations</span></a>
+                    <a href="/admin/services.html" class="nav-link active"><i class="fa-solid fa-bell-concierge"></i><span class="nav-text">Services & Slots</span></a>
+                    <a href="/admin/customers.html" class="nav-link"><i class="fa-solid fa-users"></i><span class="nav-text">Customers</span></a>
+                    <a href="/admin/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="/admin/settings.html" class="nav-link"><i class="fa-solid fa-sliders"></i><span class="nav-text">Settings</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar" style="background: var(--primary-600); color: #fff;">A</div>
+                    <div class="sidebar-user-info"><div class="name">Administrator</div><div class="role">admin</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Service & Availability Management</h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-primary btn-sm" onclick="openCreateServiceModal()"><i class="fa-solid fa-plus"></i> Add New Service</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="searchInput" placeholder="Search service name, category, or description...">
+                        </div>
+                        <select class="filter-select" id="categoryFilter">
+                            <option value="all">All Categories</option>
+                        </select>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="all">All Statuses</option>
+                            <option value="active">Active Only</option>
+                            <option value="inactive">Inactive Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Services Table Card -->
+                <div class="card">
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container" id="servicesTable">
+                            <div class="loading-spinner"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create/Edit Service Modal -->
+    <div class="modal" id="serviceModal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle"><i class="fa-solid fa-concierge-bell"></i> Add Service</h3>
+                <button class="modal-close" onclick="closeModal('serviceModal')">&times;</button>
+            </div>
+            <form id="serviceForm">
+                <input type="hidden" id="serviceId">
+                <div class="modal-body">
+                    <div class="grid grid-2" style="gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label" for="serviceName">Service Name *</label>
+                            <input type="text" id="serviceName" class="form-control" required placeholder="e.g. Deluxe Spa Suite">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="serviceCategory">Category *</label>
+                            <input type="text" id="serviceCategory" class="form-control" required placeholder="e.g. Spa & Wellness, Dining, Recreation">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="serviceDesc">Description *</label>
+                        <textarea id="serviceDesc" class="form-control" rows="3" required placeholder="Describe what is included in this reservation service..."></textarea>
+                    </div>
+
+                    <div class="grid grid-2" style="gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label" for="servicePrice">Price per Unit (₹) *</label>
+                            <input type="number" id="servicePrice" class="form-control" min="0" step="1" required placeholder="e.g. 1500">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="serviceCapacity">Slot Capacity (Max Pax) *</label>
+                            <input type="number" id="serviceCapacity" class="form-control" min="1" step="1" required placeholder="e.g. 5">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="serviceSlots">Available Time Slots (comma-separated 24h format)</label>
+                        <input type="text" id="serviceSlots" class="form-control" placeholder="09:00, 10:00, 11:00, 14:00, 16:00, 18:00">
+                        <small style="color: var(--gray-500); font-size: 0.78rem;">Enter hours in HH:MM format separated by commas.</small>
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                        <input type="checkbox" id="serviceIsActive" checked style="width: 18px; height: 18px; accent-color: var(--primary-600); cursor: pointer;">
+                        <label for="serviceIsActive" style="font-weight: 600; color: var(--gray-800); cursor: pointer; margin: 0;">
+                            Service is active & available for customer booking
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('serviceModal')">Cancel</button>
+                    <button type="submit" id="saveServiceBtn" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Service</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let allServices = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            const user = await checkAuth('admin');
+            if (!user) return;
+            loadServices();
+
+            document.getElementById('searchInput').addEventListener('input', debounce(filterServices, 250));
+            document.getElementById('categoryFilter').addEventListener('change', filterServices);
+            document.getElementById('statusFilter').addEventListener('change', filterServices);
+            document.getElementById('serviceForm').addEventListener('submit', handleSaveService);
+        });
+
+        async function loadServices() {
+            try {
+                const res = await API.get('/admin/services');
+                if (res.success) {
+                    allServices = res.services || [];
+                    populateCategoryFilter(res.categories || []);
+                    filterServices();
+                } else {
+                    document.getElementById('servicesTable').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h3>Failed to load services</h3>
+                            <p>${res.message || 'Error occurred.'}</p>
+                        </div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('servicesTable').innerHTML = '<div class="alert alert-danger">Error retrieving services.</div>';
+            }
+        }
+
+        function populateCategoryFilter(categories) {
+            const select = document.getElementById('categoryFilter');
+            const current = select.value;
+            select.innerHTML = '<option value="all">All Categories</option>';
+            categories.forEach(cat => {
+                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+            if (current && categories.includes(current)) select.value = current;
+        }
+
+        function filterServices() {
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const category = document.getElementById('categoryFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            let filtered = allServices;
+
+            if (search) {
+                filtered = filtered.filter(s =>
+                    (s.name && s.name.toLowerCase().includes(search)) ||
+                    (s.description && s.description.toLowerCase().includes(search)) ||
+                    (s.category && s.category.toLowerCase().includes(search))
+                );
+            }
+
+            if (category !== 'all') {
+                filtered = filtered.filter(s => s.category === category);
+            }
+
+            if (status === 'active') {
+                filtered = filtered.filter(s => s.isActive);
+            } else if (status === 'inactive') {
+                filtered = filtered.filter(s => !s.isActive);
+            }
+
+            renderServices(filtered);
+        }
+
+        function renderServices(list) {
+            const container = document.getElementById('servicesTable');
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-concierge-bell"></i>
+                        <h3>No Services Found</h3>
+                        <p>No services matched your search or filter criteria.</p>
+                        <button class="btn btn-primary" onclick="openCreateServiceModal()" style="margin-top: 12px;">Add Service</button>
+                    </div>`;
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Service Details</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Capacity</th>
+                            <th>Slots Available</th>
+                            <th>Status</th>
+                            <th>Bookings</th>
+                            <th class="actions-col" style="min-width: 120px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            list.forEach(s => {
+                const statusBadge = s.isActive
+                    ? `<span class="badge badge-success"><span class="dot-indicator active"></span> Active</span>`
+                    : `<span class="badge badge-danger"><span class="dot-indicator inactive"></span> Inactive</span>`;
+
+                const slotCount = (s.timeSlots && s.timeSlots.length) || 0;
+
+                html += `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: var(--gray-900); font-size: 0.95rem;">${s.name}</div>
+                            <div style="font-size: 0.78rem; color: var(--gray-500); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${s.description}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-info" style="font-weight: 500;">${s.category}</span>
+                        </td>
+                        <td style="font-weight: 800; color: var(--gray-900); font-size: 1rem;">
+                            ${formatCurrency(s.price)}
+                        </td>
+                        <td>
+                            <span style="font-weight: 600; color: var(--gray-800);"><i class="fa-solid fa-users" style="color: var(--gray-400); font-size: 0.8rem;"></i> ${s.capacity} pax</span>
+                        </td>
+                        <td>
+                            <span style="font-size: 0.85rem; color: var(--gray-700);">${slotCount} slot(s)</span>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <span class="badge ${s.totalBookings > 0 ? 'badge-primary' : 'badge-neutral'}">
+                                ${s.totalBookings || 0} (${s.activeBookings || 0} active)
+                            </span>
+                        </td>
+                        <td class="actions-cell" style="white-space: nowrap; min-width: 120px; text-align: center;">
+                            <div class="table-actions">
+                                <button class="btn btn-outline btn-sm btn-icon-only" onclick="openEditServiceModal('${s.id}')" title="Edit Service">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm btn-icon-only" onclick="handleDeleteService('${s.id}', '${escapeHtml(s.name)}', ${s.activeBookings || 0})" title="Delete or Deactivate">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function openCreateServiceModal() {
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceId').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus-circle"></i> Add New Service';
+            document.getElementById('serviceSlots').value = '09:00, 10:00, 11:00, 12:00, 14:00, 15:00, 16:00, 17:00';
+            document.getElementById('serviceIsActive').checked = true;
+            openModal('serviceModal');
+        }
+
+        function openEditServiceModal(id) {
+            const s = allServices.find(item => item.id === id);
+            if (!s) return;
+
+            document.getElementById('serviceId').value = s.id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Service';
+            document.getElementById('serviceName').value = s.name;
+            document.getElementById('serviceCategory').value = s.category;
+            document.getElementById('serviceDesc').value = s.description;
+            document.getElementById('servicePrice').value = s.price;
+            document.getElementById('serviceCapacity').value = s.capacity;
+            document.getElementById('serviceSlots').value = (s.timeSlots || []).join(', ');
+            document.getElementById('serviceIsActive').checked = s.isActive;
+
+            openModal('serviceModal');
+        }
+
+        async function handleSaveService(e) {
+            e.preventDefault();
+            const id = document.getElementById('serviceId').value;
+            const btn = document.getElementById('saveServiceBtn');
+
+            const name = document.getElementById('serviceName').value.trim();
+            const category = document.getElementById('serviceCategory').value.trim();
+            const description = document.getElementById('serviceDesc').value.trim();
+            const price = parseFloat(document.getElementById('servicePrice').value);
+            const capacity = parseInt(document.getElementById('serviceCapacity').value);
+            const slotsRaw = document.getElementById('serviceSlots').value;
+            const isActive = document.getElementById('serviceIsActive').checked;
+
+            const timeSlots = slotsRaw
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span> Saving...';
+
+            const payload = {
+                name,
+                category,
+                description,
+                price,
+                capacity,
+                timeSlots,
+                isActive
+            };
+
+            try {
+                let res;
+                if (id) {
+                    res = await API.put(`/admin/services/${id}`, payload);
+                } else {
+                    res = await API.post('/admin/services', payload);
+                }
+
+                if (res.success) {
+                    showToast(res.message || 'Service saved successfully!', 'success');
+                    closeModal('serviceModal');
+                    loadServices();
+                } else {
+                    showToast(res.message || 'Failed to save service', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while saving service', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Service';
+            }
+        }
+
+        async function handleDeleteService(id, name, activeBookings) {
+            let message = `Are you sure you want to remove "${name}"?`;
+            let hint = 'This will delete the service record if there are no existing reservations.';
+            if (activeBookings > 0) {
+                hint = `Warning: This service currently has ${activeBookings} active reservation(s). The system will safely deactivate it instead of deleting to preserve customer records.`;
+            }
+
+            const confirmed = await confirmModal(message, hint);
+            if (!confirmed) return;
+
+            try {
+                const res = await API.delete(`/admin/services/${id}`);
+                if (res.success) {
+                    showToast(res.message || 'Service deleted or deactivated successfully!', 'success');
+                    loadServices();
+                } else {
+                    showToast(res.message || 'Failed to delete service', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while deleting service', 'error');
+            }
+        }
+
+        function escapeHtml(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

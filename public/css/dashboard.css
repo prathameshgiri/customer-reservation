@@ -1,0 +1,126 @@
+/* ============================================================
+   ReserveEase - Dashboard & Analytics Specific Stylesheet
+   ============================================================ */
+
+/* Charts Container & Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.chart-card {
+    background: #ffffff;
+    border-radius: var(--radius-lg, 14px);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+    border: 1px solid var(--gray-200, #e2e8f0);
+    padding: 24px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-card:hover {
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.07));
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100, #f1f5f9);
+}
+
+.chart-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gray-800, #1e293b);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-body {
+    position: relative;
+    height: 280px;
+    width: 100%;
+}
+
+/* Admin Metric Highlights */
+.kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-top: 6px;
+}
+
+.kpi-trend.up {
+    background-color: var(--success-50, #f0fdf4);
+    color: var(--success-700, #15803d);
+}
+
+.kpi-trend.neutral {
+    background-color: var(--gray-100, #f1f5f9);
+    color: var(--gray-600, #475569);
+}
+
+/* Quick Filter Toolbar */
+.filter-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    background: #ffffff;
+    padding: 14px 18px;
+    border-radius: var(--radius-lg, 14px);
+    border: 1px solid var(--gray-200, #e2e8f0);
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.filter-toolbar .search-box {
+    flex: 1 1 200px;
+    min-width: 160px;
+}
+
+.filter-toolbar select,
+.filter-toolbar input[type="date"] {
+    padding: 8px 12px;
+    border: 1px solid var(--gray-300, #cbd5e1);
+    border-radius: var(--radius-md, 10px);
+    font-size: 0.88rem;
+    background-color: #ffffff;
+    color: var(--gray-700, #334155);
+    max-width: 100%;
+}
+
+/* Status Pill Indicators */
+.dot-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+.dot-indicator.active { background-color: #22c55e; }
+.dot-indicator.inactive { background-color: #ef4444; }
+
+/* Admin Service Detail Card */
+.service-preview-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--gray-100, #f1f5f9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-400, #94a3b8);
+}

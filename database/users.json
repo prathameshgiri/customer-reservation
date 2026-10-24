@@ -1,0 +1,112 @@
+[
+  {
+    "id": "09fff0d2-0817-4be3-b658-d50a57f778b0",
+    "fullName": "System Administrator",
+    "email": "admin@reservations.com",
+    "phone": "9876543210",
+    "passwordHash": "$2a$10$Cst178Bv6NUQmfvz938gYuZocD7WI7Jc32JSWpolJuTeN8b8wZSXm",
+    "role": "admin",
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.271Z",
+    "updatedAt": "2026-10-23T15:13:42.271Z"
+  },
+  {
+    "id": "95f393ed-57f5-4c79-89f2-e5aeeef1daff",
+    "fullName": "Rahul Sharma",
+    "email": "testuser_1792769049430@example.com",
+    "phone": "9876543210",
+    "passwordHash": "$2a$10$yjlIb3PlckBXvKNtQEAwnOfcL3uFADeDktIPoU8j4HiO1eSqIzrU2",
+    "role": "customer",
+    "isActive": true,
+    "createdAt": "2026-10-23T15:24:09.789Z",
+    "updatedAt": "2026-10-23T15:24:09.789Z"
+  },
+  {
+    "id": "f8f1e75e-e365-4dab-9f7c-d7c5cba8c9db",
+    "fullName": "Pooja Verma",
+    "email": "testuser2_1792769049430@example.com",
+    "phone": "9876543212",
+    "passwordHash": "$2a$10$mjj.tDusTBkW5wCF6mB3x.2axxjaRV3rO0Atre8PpkIB7yUzftIDC",
+    "role": "customer",
+    "isActive": true,
+    "createdAt": "2026-10-23T15:24:10.032Z",
+    "updatedAt": "2026-10-23T15:24:10.032Z"
+  },
+  {
+    "id": "8d50b7ed-5983-4f3f-8123-fb35f597e4d6",
+    "fullName": "Rahul Sharma Updated",
+    "email": "testuser_1792769112246@example.com",
+    "phone": "9876500000",
+    "passwordHash": "$2a$10$VYpcWnawTZb4ovGkN.V.m.lovCUV6909tWOp.bf8vDq9Fi3BnhCmK",
+    "role": "customer",
+    "isActive": true,
+    "createdAt": "2026-10-23T15:25:12.489Z",
+    "updatedAt": "2026-10-23T15:25:14.018Z"
+  },
+  {
+    "id": "d0e2fb6c-1e00-4ae6-9e37-05d85285ac0c",
+    "fullName": "Pooja Verma",
+    "email": "testuser2_1792769112246@example.com",
+    "phone": "9876543212",
+    "passwordHash": "$2a$10$/.7gHqkdVM.cKmLgh3frduu2Uh8kSkQ7eJedQeWPOAgvl83jsAqAu",
+    "role": "customer",
+    "isActive": false,
+    "createdAt": "2026-10-23T15:25:12.710Z",
+    "updatedAt": "2026-10-23T15:25:13.540Z"
+  },
+  {
+    "id": "f612fbc5-730d-4617-86e7-81f8e102c556",
+    "fullName": "Rahul Sharma Updated",
+    "email": "testuser_1792769376081@example.com",
+    "phone": "9876500000",
+    "passwordHash": "$2a$10$nfGwSQSrztW6z7e7ej9qou1VhrVgULh/I7rfdh0CS2z84Sw3MnzRS",
+    "role": "customer",
+    "isActive": true,
+    "createdAt": "2026-10-23T15:29:36.425Z",
+    "updatedAt": "2026-10-23T15:29:38.001Z"
+  },
+  {
+    "id": "b4503acd-2b92-440d-80fb-264b53a3ee37",
+    "fullName": "Pooja Verma",
+    "email": "testuser2_1792769376081@example.com",
+    "phone": "9876543212",
+    "passwordHash": "$2a$10$ii/miiwSLyQW1jiXLjai..q0xOx7ZNZCWwHqN/yhAxdgLkcC0vm6G",
+    "role": "customer",
+    "isActive": false,
+    "createdAt": "2026-10-23T15:29:36.652Z",
+    "updatedAt": "2026-10-23T15:29:37.535Z"
+  },
+  {
+    "id": "1894ea8b-caf3-4507-a69e-3056b13fcb88",
+    "fullName": "Prathamesh Giri",
+    "email": "prathameshgiri8607@gmail.com",
+    "phone": "8698333062",
+    "passwordHash": "$2a$10$eLPsl4.4bem5gmgF3dSZC./hvQp6sQKU8GrpvT8NesKT7gL8ipopq",
+    "role": "customer",
+    "isActive": true,
+    "createdAt": "2026-10-23T15:37:58.552Z",
+    "updatedAt": "2026-10-23T15:37:58.552Z"
+  },
+  {
+    "id": "ef5c6946-96ed-4e58-91e2-aabc8d9e7f11",
+    "fullName": "Prathamesh Giri",
+    "email": "prathamesh.new.8607@gmail.com",
+    "phone": "9876543210",
+    "passwordHash": "$2a$10$eLPsl4.4bem5gmgF3dSZC./hvQp6sQKU8GrpvT8NesKT7gL8ipopq",
+    "role": "customer",
+    "isActive": true,
+    "createdAt": "2026-10-24T03:42:29.378Z",
+    "updatedAt": "2026-10-24T03:42:29.378Z"
+  },
+  {
+    "id": "08df395d-13ed-4cd9-ae5e-9d8c678ee913",
+    "fullName": "Rahul Sharma",
+    "email": "customer@example.com",
+    "phone": "9876543211",
+    "passwordHash": "$2a$10$bc7j2d/yTCixUkMsC9FVSO3FSw6WRK5lkTKJa85yDm6DIigMXsfPy",
+    "role": "customer",
+    "isActive": true,
+    "createdAt": "2026-10-24T05:42:36.220Z",
+    "updatedAt": "2026-10-24T05:42:36.220Z"
+  }
+]

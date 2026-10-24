@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings - ReserveEase Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="logo-text">ReserveEase <span>Admin Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="/admin/dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="nav-text">Dashboard</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <a href="/admin/reservations.html" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Reservations</span></a>
+                    <a href="/admin/services.html" class="nav-link"><i class="fa-solid fa-bell-concierge"></i><span class="nav-text">Services & Slots</span></a>
+                    <a href="/admin/customers.html" class="nav-link"><i class="fa-solid fa-users"></i><span class="nav-text">Customers</span></a>
+                    <a href="/admin/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="/admin/settings.html" class="nav-link active"><i class="fa-solid fa-sliders"></i><span class="nav-text">Settings</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar" style="background: var(--primary-600); color: #fff;">A</div>
+                    <div class="sidebar-user-info"><div class="name">Administrator</div><div class="role">admin</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Global System Settings</h1>
+                </div>
+                <div class="header-right">
+                    <button type="submit" form="settingsForm" id="saveTopBtn" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                </div>
+            </header>
+
+            <div class="page-content" style="max-width: 900px; margin: 0 auto;">
+                <form id="settingsForm">
+                    <!-- General Settings Card -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-gear"></i> Application Branding & Currency</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label" for="appName">Application Name *</label>
+                                <input type="text" id="appName" class="form-control" required placeholder="e.g. ReserveEase">
+                            </div>
+
+                            <div class="grid grid-2" style="gap: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label" for="currencyCode">Currency Code *</label>
+                                    <input type="text" id="currencyCode" class="form-control" required placeholder="e.g. INR">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="currencySymbol">Currency Symbol *</label>
+                                    <input type="text" id="currencySymbol" class="form-control" required placeholder="e.g. ₹">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact & Communication -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-address-book"></i> Support Contact Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-2" style="gap: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label" for="contactEmail">Contact Email *</label>
+                                    <input type="email" id="contactEmail" class="form-control" required placeholder="support@reserveease.com">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="contactPhone">Contact Phone *</label>
+                                    <input type="tel" id="contactPhone" class="form-control" required placeholder="+91 98765 43210">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Policies & Payment Methods -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-shield-halved"></i> Reservation & Payment Policies</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label" for="cancellationPolicy">Cancellation Policy</label>
+                                <textarea id="cancellationPolicy" class="form-control" rows="3" placeholder="Explain the reservation cancellation rules for customers..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="bookingRestrictions">Booking Time Restrictions</label>
+                                <input type="text" id="bookingRestrictions" class="form-control" placeholder="e.g. Same-day bookings allowed up to 2 hours prior">
+                            </div>
+
+                            <div class="form-group" style="margin-top: 20px;">
+                                <label class="form-label" style="margin-bottom: 10px;">Enabled Payment Methods</label>
+                                <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="methodUPI" value="UPI" style="width: 18px; height: 18px; accent-color: var(--primary-600);">
+                                        <span style="font-weight: 600; color: var(--gray-800);"><i class="fa-solid fa-mobile-screen-button"></i> UPI Payments</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="methodCard" value="Card" style="width: 18px; height: 18px; accent-color: var(--primary-600);">
+                                        <span style="font-weight: 600; color: var(--gray-800);"><i class="fa-solid fa-credit-card"></i> Credit / Debit Card</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="methodCash" value="Cash" style="width: 18px; height: 18px; accent-color: var(--primary-600);">
+                                        <span style="font-weight: 600; color: var(--gray-800);"><i class="fa-solid fa-money-bill-wave"></i> Cash at Counter</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 40px;">
+                        <button type="submit" id="saveBottomBtn" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-floppy-disk"></i> Save System Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            const user = await checkAuth('admin');
+            if (!user) return;
+            loadSettings();
+
+            document.getElementById('settingsForm').addEventListener('submit', handleSaveSettings);
+        });
+
+        async function loadSettings() {
+            try {
+                const res = await API.get('/settings');
+                if (res.success && res.settings) {
+                    const s = res.settings;
+                    document.getElementById('appName').value = s.applicationName || 'ReserveEase';
+                    document.getElementById('currencyCode').value = s.currency || 'INR';
+                    document.getElementById('currencySymbol').value = s.currencySymbol || '₹';
+                    document.getElementById('contactEmail').value = s.contactEmail || '';
+                    document.getElementById('contactPhone').value = s.contactPhone || '';
+                    document.getElementById('cancellationPolicy').value = s.cancellationPolicy || '';
+                    document.getElementById('bookingRestrictions').value = s.bookingTimeRestrictions || '';
+
+                    const methods = s.enabledPaymentMethods || ['UPI', 'Card', 'Cash'];
+                    document.getElementById('methodUPI').checked = methods.includes('UPI');
+                    document.getElementById('methodCard').checked = methods.includes('Card');
+                    document.getElementById('methodCash').checked = methods.includes('Cash');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load settings', 'error');
+            }
+        }
+
+        async function handleSaveSettings(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveBottomBtn');
+            const topBtn = document.getElementById('saveTopBtn');
+
+            const applicationName = document.getElementById('appName').value.trim();
+            const currency = document.getElementById('currencyCode').value.trim();
+            const currencySymbol = document.getElementById('currencySymbol').value.trim();
+            const contactEmail = document.getElementById('contactEmail').value.trim();
+            const contactPhone = document.getElementById('contactPhone').value.trim();
+            const cancellationPolicy = document.getElementById('cancellationPolicy').value.trim();
+            const bookingTimeRestrictions = document.getElementById('bookingRestrictions').value.trim();
+
+            const enabledPaymentMethods = [];
+            if (document.getElementById('methodUPI').checked) enabledPaymentMethods.push('UPI');
+            if (document.getElementById('methodCard').checked) enabledPaymentMethods.push('Card');
+            if (document.getElementById('methodCash').checked) enabledPaymentMethods.push('Cash');
+
+            if (enabledPaymentMethods.length === 0) {
+                showToast('Please enable at least one payment method', 'warning');
+                return;
+            }
+
+            btn.disabled = true;
+            topBtn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span> Saving...';
+
+            try {
+                const res = await API.put('/admin/settings', {
+                    applicationName,
+                    currency,
+                    currencySymbol,
+                    contactEmail,
+                    contactPhone,
+                    cancellationPolicy,
+                    bookingTimeRestrictions,
+                    enabledPaymentMethods
+                });
+
+                if (res.success) {
+                    showToast('Settings saved successfully!', 'success');
+                } else {
+                    showToast(res.message || 'Failed to update settings', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while saving settings', 'error');
+            } finally {
+                btn.disabled = false;
+                topBtn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save System Configuration';
+            }
+        }
+    </script>
+</body>
+</html>

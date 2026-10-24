@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reservations - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="logo-text">ReserveEase <span>Customer Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <a href="/customer-dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span></a>
+                    <a href="/services.html" class="nav-link"><i class="fa-solid fa-concierge-bell"></i><span class="nav-text">Browse Services</span></a>
+                    <a href="/booking.html" class="nav-link"><i class="fa-solid fa-plus-circle"></i><span class="nav-text">Make Reservation</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">My Account</div>
+                    <a href="/my-reservations.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span class="nav-text">My Reservations</span></a>
+                    <a href="/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                    <a href="/profile.html" class="nav-link"><i class="fa-solid fa-user-gear"></i><span class="nav-text">Profile</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar">U</div>
+                    <div class="sidebar-user-info"><div class="name">User</div><div class="role">customer</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">My Reservations</h1>
+                </div>
+                <div class="header-right">
+                    <a href="/booking.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Booking</a>
+                </div>
+            </header>
+            <div class="page-content">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="searchInput" placeholder="Search by booking ID or service...">
+                        </div>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="all">All Statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container" id="reservationsTable">
+                            <div class="loading-spinner"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            await checkAuth('customer');
+            loadReservations();
+
+            document.getElementById('searchInput').addEventListener('input', debounce(loadReservations, 300));
+            document.getElementById('statusFilter').addEventListener('change', loadReservations);
+        });
+
+        async function loadReservations() {
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('statusFilter').value;
+            let url = '/reservations/my?';
+            if (search) url += `search=${encodeURIComponent(search)}&`;
+            if (status !== 'all') url += `status=${status}&`;
+
+            const container = document.getElementById('reservationsTable');
+            showLoading(container);
+
+            const res = await API.get(url);
+            if (!res.ok) {
+                showToast('Failed to load reservations', 'error');
+                return;
+            }
+
+            const reservations = res.data.reservations;
+            if (reservations.length === 0) {
+                showEmpty(container, 'fa-calendar-xmark', 'No Reservations Found', 'You haven\'t made any reservations yet.',
+                    '<a href="/booking.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Make Reservation</a>');
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Qty</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th class="actions-col" style="min-width: 110px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${reservations.map(r => `
+                            <tr>
+                                <td><strong style="color: var(--primary-700); font-family: monospace;">${r.bookingId}</strong></td>
+                                <td style="font-weight: 600;">${r.serviceName}</td>
+                                <td>${formatDate(r.reservationDate)}</td>
+                                <td>${formatTime(r.timeSlot)}</td>
+                                <td style="text-align: center; font-weight: 600;">${r.quantity}</td>
+                                <td style="font-weight: 800; color: var(--gray-900);">${formatCurrency(r.totalAmount)}</td>
+                                <td>${getStatusBadge(r.reservationStatus)}</td>
+                                <td>${getStatusBadge(r.paymentStatus)}</td>
+                                <td class="actions-cell" style="white-space: nowrap; min-width: 110px; text-align: center;">
+                                    <div class="table-actions">
+                                        <button class="btn btn-outline btn-sm btn-icon-only" title="View Details" onclick="window.location.href='/reservation-details.html?id=${r.id}'">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        ${['Pending', 'Confirmed'].includes(r.reservationStatus) ? `
+                                            <button class="btn btn-danger btn-sm btn-icon-only" title="Cancel Booking" onclick="cancelReservation('${r.id}', '${r.bookingId}')">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function cancelReservation(id, bookingId) {
+            showConfirm('Cancel Reservation?', `Are you sure you want to cancel booking ${bookingId}? This action cannot be undone.`, async () => {
+                const res = await API.patch(`/reservations/${id}/cancel`, { reason: 'Cancelled by customer' });
+                if (res.ok) {
+                    showToast('Reservation cancelled successfully', 'success');
+                    loadReservations();
+                } else {
+                    showToast(res.data.message || 'Failed to cancel', 'error');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

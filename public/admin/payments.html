@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Records - ReserveEase Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="logo-text">ReserveEase <span>Admin Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="/admin/dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="nav-text">Dashboard</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <a href="/admin/reservations.html" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Reservations</span></a>
+                    <a href="/admin/services.html" class="nav-link"><i class="fa-solid fa-bell-concierge"></i><span class="nav-text">Services & Slots</span></a>
+                    <a href="/admin/customers.html" class="nav-link"><i class="fa-solid fa-users"></i><span class="nav-text">Customers</span></a>
+                    <a href="/admin/payments.html" class="nav-link active"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="/admin/settings.html" class="nav-link"><i class="fa-solid fa-sliders"></i><span class="nav-text">Settings</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar" style="background: var(--primary-600); color: #fff;">A</div>
+                    <div class="sidebar-user-info"><div class="name">Administrator</div><div class="role">admin</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Payment & Audit Trail</h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-outline btn-sm" onclick="loadPayments()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Filter Toolbar -->
+                <div class="filter-toolbar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search reference, booking ID, customer...">
+                    </div>
+                    <select id="statusFilter">
+                        <option value="all">All Payment Statuses</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Refunded">Refunded</option>
+                        <option value="Failed">Failed</option>
+                    </select>
+                    <select id="methodFilter">
+                        <option value="all">All Payment Methods</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Card">Card</option>
+                        <option value="Cash">Cash</option>
+                    </select>
+                </div>
+
+                <!-- Payments Table Card -->
+                <div class="card">
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container" id="paymentsTable">
+                            <div class="loading-spinner"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Payment Detail / Receipt Modal -->
+    <div class="modal" id="paymentDetailModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-receipt"></i> Payment Details & Audit</h3>
+                <button class="modal-close" onclick="closeModal('paymentDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="paymentModalBody">
+                <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('paymentDetailModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Payment Status Modal -->
+    <div class="modal" id="updatePaymentModal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Update Payment Status</h3>
+                <button class="modal-close" onclick="closeModal('updatePaymentModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editPaymentId">
+                <div class="form-group">
+                    <label class="form-label" for="newPaymentStatus">Target Status *</label>
+                    <select id="newPaymentStatus" class="form-control">
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Refunded">Refunded</option>
+                        <option value="Failed">Failed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="statusAuditReason">Audit Reason *</label>
+                    <textarea id="statusAuditReason" class="form-control" rows="3" required placeholder="Specify reason (e.g. Authorized customer refund, Cash received at counter, Duplicate charge reversal)..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('updatePaymentModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitPaymentStatusUpdate()"><i class="fa-solid fa-check"></i> Apply Adjustment</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            const user = await checkAuth('admin');
+            if (!user) return;
+            loadPayments();
+
+            document.getElementById('searchInput').addEventListener('input', debounce(loadPayments, 300));
+            document.getElementById('statusFilter').addEventListener('change', loadPayments);
+            document.getElementById('methodFilter').addEventListener('change', loadPayments);
+        });
+
+        async function loadPayments() {
+            const search = document.getElementById('searchInput').value.trim();
+            const status = document.getElementById('statusFilter').value;
+            const method = document.getElementById('methodFilter').value;
+
+            let query = '/admin/payments?';
+            if (search) query += `search=${encodeURIComponent(search)}&`;
+            if (status !== 'all') query += `status=${encodeURIComponent(status)}&`;
+            if (method !== 'all') query += `method=${encodeURIComponent(method)}&`;
+
+            try {
+                const res = await API.get(query);
+                if (res.success) {
+                    renderPayments(res.payments || []);
+                } else {
+                    document.getElementById('paymentsTable').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h3>Failed to load payments</h3>
+                            <p>${res.message || 'Error occurred.'}</p>
+                        </div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('paymentsTable').innerHTML = '<div class="alert alert-danger">Error retrieving payments.</div>';
+            }
+        }
+
+        function renderPayments(list) {
+            const container = document.getElementById('paymentsTable');
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-receipt"></i>
+                        <h3>No Payments Recorded</h3>
+                        <p>No transaction records match the current filters.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Payment Ref</th>
+                            <th>Customer</th>
+                            <th>Booking ID & Service</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th class="actions-col" style="min-width: 110px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            list.forEach(p => {
+                const statusBadge = getStatusBadge(p.paymentStatus);
+                const methodIcon = p.paymentMethod === 'UPI' ? 'fa-mobile-screen-button' : (p.paymentMethod === 'Card' ? 'fa-credit-card' : 'fa-money-bill-wave');
+
+                html += `
+                    <tr>
+                        <td>
+                            <strong style="color: var(--primary-700); font-family: monospace; font-size: 0.95rem;">${p.paymentReference}</strong>
+                            ${p.isDemoTransaction ? '<div style="font-size: 0.72rem; color: var(--gray-500);"><i class="fa-solid fa-flask"></i> Demo</div>' : ''}
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--gray-900);">${p.customerName || 'Customer'}</div>
+                            <div style="font-size: 0.78rem; color: var(--gray-500);">${p.customerEmail || ''}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--gray-800);">${p.serviceName || 'Service'}</div>
+                            <div style="font-size: 0.78rem; color: var(--primary-600); font-family: monospace;">${p.bookingId}</div>
+                        </td>
+                        <td style="font-weight: 800; color: var(--gray-900); font-size: 1rem;">
+                            ${formatCurrency(p.amount)}
+                        </td>
+                        <td>
+                            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--gray-700);">
+                                <i class="fa-solid ${methodIcon}" style="color: var(--primary-600);"></i> ${p.paymentMethod}
+                            </span>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td style="font-size: 0.82rem; color: var(--gray-600);">${formatDateTime(p.createdAt)}</td>
+                        <td class="actions-cell" style="white-space: nowrap; min-width: 110px; text-align: center;">
+                            <div class="table-actions">
+                                <button class="btn btn-outline btn-sm btn-icon-only" onclick="viewPaymentDetail('${p.id}')" title="View Audit Details">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm btn-icon-only" onclick="openUpdatePaymentModal('${p.id}', '${p.paymentStatus}')" title="Adjust Status">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        async function viewPaymentDetail(paymentId) {
+            openModal('paymentDetailModal');
+            const body = document.getElementById('paymentModalBody');
+            body.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+            try {
+                const res = await API.get(`/admin/payments/${paymentId}`);
+                if (!res.success) {
+                    body.innerHTML = `<div class="alert alert-danger">${res.message || 'Error fetching payment'}</div>`;
+                    return;
+                }
+
+                const p = res.payment;
+                body.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: var(--gray-50); padding: 16px; border-radius: 10px; margin-bottom: 20px;">
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Payment Reference</span>
+                            <strong style="color: var(--gray-900); font-family: monospace; font-size: 1rem;">${p.paymentReference}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Payment Status</span>
+                            <div>${getStatusBadge(p.paymentStatus)}</div>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Amount</span>
+                            <strong style="color: var(--primary-700); font-size: 1.15rem;">${formatCurrency(p.amount)}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Method</span>
+                            <strong style="color: var(--gray-900);">${p.paymentMethod} (Simulated)</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Booking ID</span>
+                            <strong style="color: var(--gray-900); font-family: monospace;">${p.bookingId}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Service</span>
+                            <strong style="color: var(--gray-900);">${p.serviceName || 'Service'}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Created At</span>
+                            <span style="color: var(--gray-800); font-size: 0.85rem;">${formatDateTime(p.createdAt)}</span>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-500); font-size: 0.8rem; display: block;">Last Updated</span>
+                            <span style="color: var(--gray-800); font-size: 0.85rem;">${formatDateTime(p.updatedAt)}</span>
+                        </div>
+                    </div>
+
+                    ${p.statusChangeReason ? `
+                        <div style="background: var(--warning-50); border-left: 4px solid var(--warning-500); padding: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: var(--gray-800);">
+                            <strong>Audit Trail Reason:</strong> ${escapeHtml(p.statusChangeReason)}
+                        </div>
+                    ` : ''}
+                `;
+            } catch (err) {
+                console.error(err);
+                body.innerHTML = '<div class="alert alert-danger">Error retrieving payment record.</div>';
+            }
+        }
+
+        function openUpdatePaymentModal(id, currentStatus) {
+            document.getElementById('editPaymentId').value = id;
+            document.getElementById('newPaymentStatus').value = currentStatus;
+            document.getElementById('statusAuditReason').value = '';
+            openModal('updatePaymentModal');
+        }
+
+        async function submitPaymentStatusUpdate() {
+            const id = document.getElementById('editPaymentId').value;
+            const status = document.getElementById('newPaymentStatus').value;
+            const reason = document.getElementById('statusAuditReason').value.trim();
+
+            if (!reason) {
+                showToast('Please specify an audit reason for modifying payment status', 'warning');
+                return;
+            }
+
+            try {
+                const res = await API.patch(`/admin/payments/${id}/status`, {
+                    status,
+                    reason
+                });
+
+                if (res.success) {
+                    showToast(`Payment marked as ${status}!`, 'success');
+                    closeModal('updatePaymentModal');
+                    loadPayments();
+                } else {
+                    showToast(res.message || 'Status update failed', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while updating payment status', 'error');
+            }
+        }
+
+        function escapeHtml(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

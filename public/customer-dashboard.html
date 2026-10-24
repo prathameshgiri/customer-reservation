@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="logo-text">ReserveEase <span>Customer Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <a href="/customer-dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span></a>
+                    <a href="/services.html" class="nav-link"><i class="fa-solid fa-concierge-bell"></i><span class="nav-text">Browse Services</span></a>
+                    <a href="/booking.html" class="nav-link"><i class="fa-solid fa-plus-circle"></i><span class="nav-text">Make Reservation</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">My Account</div>
+                    <a href="/my-reservations.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span class="nav-text">My Reservations</span></a>
+                    <a href="/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                    <a href="/profile.html" class="nav-link"><i class="fa-solid fa-user-gear"></i><span class="nav-text">Profile</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar">U</div>
+                    <div class="sidebar-user-info">
+                        <div class="name">User</div>
+                        <div class="role">customer</div>
+                    </div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <a href="/booking.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Booking</a>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Welcome Banner -->
+                <div class="welcome-banner" id="welcomeBanner">
+                    <h2>Welcome back!</h2>
+                    <p>Here's an overview of your reservations and activity.</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card primary">
+                        <div class="stat-info">
+                            <h4>Total Bookings</h4>
+                            <div class="stat-value" id="totalBookings">--</div>
+                        </div>
+                        <div class="stat-icon primary"><i class="fa-solid fa-calendar"></i></div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-info">
+                            <h4>Upcoming</h4>
+                            <div class="stat-value" id="upcomingBookings">--</div>
+                        </div>
+                        <div class="stat-icon success"><i class="fa-solid fa-clock"></i></div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-info">
+                            <h4>Completed</h4>
+                            <div class="stat-value" id="completedBookings">--</div>
+                        </div>
+                        <div class="stat-icon info"><i class="fa-solid fa-circle-check"></i></div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-info">
+                            <h4>Cancelled</h4>
+                            <div class="stat-value" id="cancelledBookings">--</div>
+                        </div>
+                        <div class="stat-icon danger"><i class="fa-solid fa-circle-xmark"></i></div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <a href="/services.html" class="quick-action-card">
+                        <i class="fa-solid fa-concierge-bell"></i>
+                        <h4>Browse Services</h4>
+                    </a>
+                    <a href="/booking.html" class="quick-action-card">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <h4>Make Reservation</h4>
+                    </a>
+                    <a href="/my-reservations.html" class="quick-action-card">
+                        <i class="fa-solid fa-list-check"></i>
+                        <h4>View Reservations</h4>
+                    </a>
+                    <a href="/payments.html" class="quick-action-card">
+                        <i class="fa-solid fa-receipt"></i>
+                        <h4>Payment History</h4>
+                    </a>
+                </div>
+
+                <!-- Recent Bookings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Bookings</h3>
+                        <a href="/my-reservations.html" class="btn btn-secondary btn-sm">View All</a>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container" id="recentBookingsTable">
+                            <div class="loading-spinner"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            const user = await checkAuth('customer');
+            if (!user) return;
+
+            document.getElementById('welcomeBanner').querySelector('h2').textContent = `Welcome back, ${user.fullName}!`;
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            const res = await API.get('/customer/dashboard');
+            if (!res.ok || !res.data.success) {
+                showToast('Failed to load dashboard', 'error');
+                return;
+            }
+
+            const { stats, recentBookings } = res.data;
+
+            document.getElementById('totalBookings').textContent = stats.totalBookings;
+            document.getElementById('upcomingBookings').textContent = stats.upcomingBookings;
+            document.getElementById('completedBookings').textContent = stats.completedBookings;
+            document.getElementById('cancelledBookings').textContent = stats.cancelledBookings;
+
+            // Recent bookings table
+            const container = document.getElementById('recentBookingsTable');
+            if (recentBookings.length === 0) {
+                showEmpty(container, 'fa-calendar-xmark', 'No Bookings Yet', 'Start by browsing our services and making your first reservation!',
+                    '<a href="/services.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-concierge-bell"></i> Browse Services</a>');
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentBookings.map(b => `
+                            <tr style="cursor:pointer;" onclick="window.location.href='/reservation-details.html?id=${b.id}'">
+                                <td><strong style="color: var(--primary-700); font-family: monospace;">${b.bookingId}</strong></td>
+                                <td style="font-weight: 600;">${b.serviceName}</td>
+                                <td>${formatDate(b.reservationDate)}</td>
+                                <td>${formatTime(b.timeSlot)}</td>
+                                <td style="font-weight: 800; color: var(--gray-900);">${formatCurrency(b.totalAmount)}</td>
+                                <td>${getStatusBadge(b.reservationStatus)}</td>
+                                <td>${getStatusBadge(b.paymentStatus)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+    </script>
+</body>
+</html>

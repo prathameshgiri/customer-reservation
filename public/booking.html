@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Reservation - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="logo-text">ReserveEase <span>Customer Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <a href="/customer-dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span></a>
+                    <a href="/services.html" class="nav-link"><i class="fa-solid fa-concierge-bell"></i><span class="nav-text">Browse Services</span></a>
+                    <a href="/booking.html" class="nav-link"><i class="fa-solid fa-plus-circle"></i><span class="nav-text">Make Reservation</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">My Account</div>
+                    <a href="/my-reservations.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span class="nav-text">My Reservations</span></a>
+                    <a href="/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                    <a href="/profile.html" class="nav-link"><i class="fa-solid fa-user-gear"></i><span class="nav-text">Profile</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar">U</div>
+                    <div class="sidebar-user-info"><div class="name">User</div><div class="role">customer</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Make a Reservation</h1>
+                </div>
+            </header>
+            <div class="page-content">
+                <div style="display: grid; grid-template-columns: 1fr 380px; gap: 24px;">
+                    <!-- Booking Form -->
+                    <div class="card">
+                        <div class="card-header"><h3><i class="fa-solid fa-calendar-plus"></i> Booking Details</h3></div>
+                        <div class="card-body">
+                            <form id="bookingForm" novalidate>
+                                <div class="form-group">
+                                    <label for="serviceSelect">Select Service *</label>
+                                    <select class="form-control" id="serviceSelect" required>
+                                        <option value="">Choose a service...</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="reservationDate">Reservation Date *</label>
+                                        <input type="date" class="form-control" id="reservationDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="timeSlot">Time Slot *</label>
+                                        <select class="form-control" id="timeSlot" required>
+                                            <option value="">Select date first</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="quantity">Number of People / Quantity *</label>
+                                    <input type="number" class="form-control" id="quantity" min="1" value="1" required>
+                                    <span class="form-text" id="capacityInfo"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="specialInstructions">Special Instructions (Optional)</label>
+                                    <textarea class="form-control" id="specialInstructions" rows="3" placeholder="Any special requests or instructions..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg btn-block" id="submitBtn">
+                                    <i class="fa-solid fa-check"></i> Confirm Reservation
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Booking Summary -->
+                    <div>
+                        <div class="booking-summary" id="bookingSummary">
+                            <h3><i class="fa-solid fa-receipt"></i> Booking Summary</h3>
+                            <div id="summaryContent">
+                                <div class="empty-state" style="padding: 24px 0;">
+                                    <i class="fa-solid fa-info-circle" style="font-size: 32px; color: var(--gray-300);"></i>
+                                    <p style="margin-top: 8px; color: var(--gray-400); font-size: 0.85rem;">Fill in the booking details to see the summary</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal">
+            <div class="modal-body" style="text-align: center; padding: 40px;">
+                <div style="width:72px;height:72px;border-radius:50%;background:var(--success-100);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                    <i class="fa-solid fa-check" style="font-size:32px;color:var(--success-600);"></i>
+                </div>
+                <h3 style="font-size:1.3rem;color:var(--gray-900);margin-bottom:8px;">Reservation Confirmed!</h3>
+                <p style="color:var(--gray-500);margin-bottom:4px;">Your booking has been created successfully.</p>
+                <p style="font-size:1.1rem;font-weight:700;color:var(--primary-700);margin:16px 0;" id="successBookingId"></p>
+                <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;">
+                    <a href="/my-reservations.html" class="btn btn-primary">View My Reservations</a>
+                    <button onclick="closeModal('successModal'); resetForm();" class="btn btn-secondary">Book Another</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let services = [];
+        let selectedService = null;
+        let slotsData = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            await checkAuth('customer');
+            await loadServices();
+
+            // Set min date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reservationDate').setAttribute('min', today);
+
+            // Event listeners
+            document.getElementById('serviceSelect').addEventListener('change', onServiceChange);
+            document.getElementById('reservationDate').addEventListener('change', onDateChange);
+            document.getElementById('timeSlot').addEventListener('change', updateSummary);
+            document.getElementById('quantity').addEventListener('input', updateSummary);
+            document.getElementById('bookingForm').addEventListener('submit', submitBooking);
+
+            // Pre-select service if passed in URL
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('service')) {
+                document.getElementById('serviceSelect').value = params.get('service');
+                onServiceChange();
+            }
+        });
+
+        async function loadServices() {
+            const res = await API.get('/services');
+            if (res.ok) {
+                services = res.data.services;
+                const select = document.getElementById('serviceSelect');
+                services.forEach(s => {
+                    select.innerHTML += `<option value="${s.id}">${s.name} — ${formatCurrency(s.price)}</option>`;
+                });
+            }
+        }
+
+        function onServiceChange() {
+            const serviceId = document.getElementById('serviceSelect').value;
+            selectedService = services.find(s => s.id === serviceId) || null;
+
+            const timeSlotSelect = document.getElementById('timeSlot');
+            timeSlotSelect.innerHTML = '<option value="">Select date first</option>';
+
+            if (selectedService) {
+                document.getElementById('quantity').max = selectedService.capacity;
+                document.getElementById('capacityInfo').textContent = `Max capacity: ${selectedService.capacity}`;
+                
+                // If date is already selected, load slots
+                const date = document.getElementById('reservationDate').value;
+                if (date) onDateChange();
+            }
+            updateSummary();
+        }
+
+        async function onDateChange() {
+            const date = document.getElementById('reservationDate').value;
+            const serviceId = document.getElementById('serviceSelect').value;
+            const timeSlotSelect = document.getElementById('timeSlot');
+
+            if (!date || !serviceId) return;
+
+            timeSlotSelect.innerHTML = '<option value="">Loading slots...</option>';
+
+            const res = await API.get(`/reservations/availability/check?serviceId=${serviceId}&date=${date}`);
+
+            if (res.ok && res.data.success) {
+                slotsData = res.data.slots;
+                timeSlotSelect.innerHTML = '<option value="">Select a time slot</option>';
+                slotsData.forEach(slot => {
+                    const disabled = slot.isFull ? 'disabled' : '';
+                    const label = slot.isFull ? `${formatTime(slot.time)} (Full)` : `${formatTime(slot.time)} — ${slot.available} available`;
+                    timeSlotSelect.innerHTML += `<option value="${slot.time}" ${disabled}>${label}</option>`;
+                });
+            } else {
+                timeSlotSelect.innerHTML = '<option value="">No slots available</option>';
+            }
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const content = document.getElementById('summaryContent');
+            if (!selectedService) {
+                content.innerHTML = `<div class="empty-state" style="padding:24px 0;"><i class="fa-solid fa-info-circle" style="font-size:32px;color:var(--gray-300);"></i><p style="margin-top:8px;color:var(--gray-400);font-size:0.85rem;">Fill in the booking details to see the summary</p></div>`;
+                return;
+            }
+
+            const date = document.getElementById('reservationDate').value;
+            const timeSlot = document.getElementById('timeSlot').value;
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const total = selectedService.price * quantity;
+
+            content.innerHTML = `
+                <div class="summary-row"><span class="label">Service</span><span class="value">${selectedService.name}</span></div>
+                <div class="summary-row"><span class="label">Category</span><span class="value">${selectedService.category}</span></div>
+                <div class="summary-row"><span class="label">Date</span><span class="value">${date ? formatDate(date) : 'Not selected'}</span></div>
+                <div class="summary-row"><span class="label">Time</span><span class="value">${timeSlot ? formatTime(timeSlot) : 'Not selected'}</span></div>
+                <div class="summary-row"><span class="label">Quantity</span><span class="value">${quantity}</span></div>
+                <div class="summary-row"><span class="label">Unit Price</span><span class="value">${formatCurrency(selectedService.price)}</span></div>
+                <div class="summary-row summary-total"><span class="label" style="font-weight:700;color:var(--gray-900);">Total Amount</span><span class="value">${formatCurrency(total)}</span></div>
+            `;
+        }
+
+        async function submitBooking(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+
+            const serviceId = document.getElementById('serviceSelect').value;
+            const reservationDate = document.getElementById('reservationDate').value;
+            const timeSlot = document.getElementById('timeSlot').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const specialInstructions = document.getElementById('specialInstructions').value;
+
+            if (!serviceId || !reservationDate || !timeSlot) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (quantity < 1) {
+                showToast('Quantity must be at least 1', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Processing...';
+
+            const res = await API.post('/reservations', { serviceId, reservationDate, timeSlot, quantity, specialInstructions });
+
+            if (res.ok && res.data.success) {
+                document.getElementById('successBookingId').textContent = `Booking ID: ${res.data.reservation.bookingId}`;
+                openModal('successModal');
+            } else {
+                showToast(res.data.message || 'Failed to create reservation', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Reservation';
+        }
+
+        function resetForm() {
+            document.getElementById('bookingForm').reset();
+            selectedService = null;
+            updateSummary();
+        }
+    </script>
+</body>
+</html>

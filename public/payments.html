@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Payments & Receipts - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="logo-text">ReserveEase <span>Customer Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <a href="/customer-dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span></a>
+                    <a href="/services.html" class="nav-link"><i class="fa-solid fa-concierge-bell"></i><span class="nav-text">Browse Services</span></a>
+                    <a href="/booking.html" class="nav-link"><i class="fa-solid fa-plus-circle"></i><span class="nav-text">Make Reservation</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">My Account</div>
+                    <a href="/my-reservations.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span class="nav-text">My Reservations</span></a>
+                    <a href="/payments.html" class="nav-link active"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                    <a href="/profile.html" class="nav-link"><i class="fa-solid fa-user-gear"></i><span class="nav-text">Profile</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar">U</div>
+                    <div class="sidebar-user-info"><div class="name">User</div><div class="role">customer</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Payment History & Receipts</h1>
+                </div>
+                <div class="header-right">
+                    <a href="/booking.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Booking</a>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Demo Notice Alert -->
+                <div class="alert alert-info" style="margin-bottom: 20px;">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <strong>Demo Simulated Payments:</strong> All transactions displayed here are simulated for demonstration purposes. No real bank accounts or credit cards are charged.
+                    </div>
+                </div>
+
+                <!-- Stats Summary -->
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card primary">
+                        <div class="stat-info">
+                            <h4>Total Paid</h4>
+                            <div class="stat-value" id="statTotalPaid">₹0</div>
+                        </div>
+                        <div class="stat-icon primary"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-info">
+                            <h4>Completed Transactions</h4>
+                            <div class="stat-value" id="statCompletedCount">0</div>
+                        </div>
+                        <div class="stat-icon success"><i class="fa-solid fa-receipt"></i></div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-info">
+                            <h4>Payment Mode</h4>
+                            <div class="stat-value" style="font-size: 1.1rem; padding-top: 6px;">Cash / Card / UPI</div>
+                        </div>
+                        <div class="stat-icon info"><i class="fa-solid fa-shield-halved"></i></div>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="searchInput" placeholder="Search reference or booking ID...">
+                        </div>
+                        <select class="filter-select" id="methodFilter">
+                            <option value="all">All Methods</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Card">Card</option>
+                            <option value="Cash">Cash</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Payments Table -->
+                <div class="card">
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container" id="paymentsTable">
+                            <div class="loading-spinner"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div class="modal" id="receiptModal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-receipt"></i> Payment Receipt</h3>
+                <button class="modal-close" onclick="closeModal('receiptModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="receiptModalBody">
+                <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: space-between;">
+                <button class="btn btn-secondary" onclick="closeModal('receiptModal')">Close</button>
+                <button class="btn btn-primary" onclick="printReceipt()"><i class="fa-solid fa-print"></i> Print Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let allPayments = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            await checkAuth('customer');
+            loadPayments();
+
+            document.getElementById('searchInput').addEventListener('input', debounce(filterPayments, 250));
+            document.getElementById('methodFilter').addEventListener('change', filterPayments);
+        });
+
+        async function loadPayments() {
+            try {
+                const res = await API.get('/api/payments/my');
+                if (res.success) {
+                    allPayments = res.payments || [];
+                    updateStats();
+                    renderPayments(allPayments);
+                } else {
+                    document.getElementById('paymentsTable').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h3>Failed to load payments</h3>
+                            <p>${res.message || 'Error occurred while loading payment records.'}</p>
+                        </div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('paymentsTable').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <h3>Error</h3>
+                        <p>Unable to load payments right now.</p>
+                    </div>`;
+            }
+        }
+
+        function updateStats() {
+            const total = allPayments
+                .filter(p => p.paymentStatus === 'Paid')
+                .reduce((sum, p) => sum + (p.amount || 0), 0);
+            const count = allPayments.filter(p => p.paymentStatus === 'Paid').length;
+
+            document.getElementById('statTotalPaid').textContent = formatCurrency(total);
+            document.getElementById('statCompletedCount').textContent = count;
+        }
+
+        function filterPayments() {
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const method = document.getElementById('methodFilter').value;
+
+            let filtered = allPayments;
+
+            if (search) {
+                filtered = filtered.filter(p =>
+                    (p.paymentReference && p.paymentReference.toLowerCase().includes(search)) ||
+                    (p.bookingId && p.bookingId.toLowerCase().includes(search)) ||
+                    (p.serviceName && p.serviceName.toLowerCase().includes(search))
+                );
+            }
+
+            if (method !== 'all') {
+                filtered = filtered.filter(p => p.paymentMethod === method);
+            }
+
+            renderPayments(filtered);
+        }
+
+        function renderPayments(list) {
+            const container = document.getElementById('paymentsTable');
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-receipt"></i>
+                        <h3>No Payment Records Found</h3>
+                        <p>You have not made any payments yet, or no payments matched your filter.</p>
+                        <a href="/booking.html" class="btn btn-primary" style="margin-top: 14px;"><i class="fa-solid fa-plus"></i> Make a Reservation</a>
+                    </div>`;
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Payment Ref</th>
+                            <th>Booking ID</th>
+                            <th>Service</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            list.forEach(p => {
+                const statusBadge = getStatusBadge(p.paymentStatus);
+                const methodIcon = p.paymentMethod === 'UPI' ? 'fa-mobile-screen-button' : (p.paymentMethod === 'Card' ? 'fa-credit-card' : 'fa-money-bill-wave');
+
+                html += `
+                    <tr>
+                        <td>
+                            <strong style="color: var(--primary-700); font-family: monospace; font-size: 0.95rem;">
+                                ${p.paymentReference || 'N/A'}
+                            </strong>
+                            ${p.isDemoTransaction ? '<div style="font-size: 0.72rem; color: var(--gray-500);"><i class="fa-solid fa-flask"></i> Demo</div>' : ''}
+                        </td>
+                        <td>
+                            <a href="/reservation-details.html?id=${p.reservationId}" style="color: var(--primary-600); font-weight: 600;">
+                                ${p.bookingId || 'View Booking'}
+                            </a>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--gray-800);">${p.serviceName || 'Service'}</div>
+                            <div style="font-size: 0.78rem; color: var(--gray-500);">${p.reservationDate || ''} ${p.timeSlot ? 'at ' + p.timeSlot : ''}</div>
+                        </td>
+                        <td style="font-weight: 700; color: var(--gray-900);">
+                            ${formatCurrency(p.amount)}
+                        </td>
+                        <td>
+                            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--gray-700);">
+                                <i class="fa-solid ${methodIcon}" style="color: var(--primary-600);"></i> ${p.paymentMethod}
+                            </span>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td style="font-size: 0.85rem; color: var(--gray-600);">${formatDate(p.createdAt)}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="viewReceipt('${p.id}')" title="View & Print Receipt">
+                                <i class="fa-solid fa-receipt"></i> Receipt
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        async function viewReceipt(paymentId) {
+            openModal('receiptModal');
+            const body = document.getElementById('receiptModalBody');
+            body.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+            try {
+                const res = await API.get(`/api/payments/${paymentId}`);
+                if (!res.success) {
+                    body.innerHTML = `<div class="alert alert-danger">${res.message || 'Unable to fetch payment details'}</div>`;
+                    return;
+                }
+
+                const p = res.payment;
+                body.innerHTML = `
+                    <div class="receipt-card" id="printableReceipt" style="border: 1px dashed var(--gray-300); border-radius: 12px; padding: 24px; background: #fafbfc;">
+                        <div style="text-align: center; border-bottom: 2px solid var(--primary-600); padding-bottom: 16px; margin-bottom: 20px;">
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-700); letter-spacing: -0.5px;">ReserveEase</div>
+                            <div style="font-size: 0.85rem; color: var(--gray-500); margin-top: 2px;">Customer Reservation & Booking System</div>
+                            <div style="display: inline-block; background: var(--success-50); color: var(--success-700); font-size: 0.75rem; font-weight: 700; padding: 3px 12px; border-radius: 20px; margin-top: 8px; border: 1px solid var(--success-500);">
+                                <i class="fa-solid fa-circle-check"></i> PAYMENT RECEIPT (${p.paymentStatus.toUpperCase()})
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.85rem; margin-bottom: 20px;">
+                            <div>
+                                <span style="color: var(--gray-500); display: block;">Receipt / Reference:</span>
+                                <strong style="font-family: monospace; color: var(--gray-800);">${p.paymentReference}</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--gray-500); display: block;">Booking ID:</span>
+                                <strong style="color: var(--primary-700);">${p.bookingId}</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--gray-500); display: block;">Date of Payment:</span>
+                                <span style="color: var(--gray-800);">${formatDateTime(p.createdAt)}</span>
+                            </div>
+                            <div>
+                                <span style="color: var(--gray-500); display: block;">Payment Method:</span>
+                                <span style="color: var(--gray-800);"><i class="fa-solid fa-check"></i> ${p.paymentMethod} (Simulated)</span>
+                            </div>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1px solid var(--gray-200); border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                            <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); margin-bottom: 8px; font-weight: 600;">Service Reserved</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <strong style="color: var(--gray-900); font-size: 0.95rem;">${p.serviceName || 'Service'}</strong>
+                                <strong style="color: var(--gray-900); font-size: 1rem;">${formatCurrency(p.amount)}</strong>
+                            </div>
+                            <div style="font-size: 0.82rem; color: var(--gray-600);">
+                                Scheduled: ${p.reservationDate} at ${p.timeSlot} | Quantity: ${p.quantity || 1}
+                            </div>
+                        </div>
+
+                        <div style="border-top: 2px dashed var(--gray-300); padding-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 1rem; font-weight: 700; color: var(--gray-800);">Total Paid:</span>
+                            <span style="font-size: 1.3rem; font-weight: 800; color: var(--primary-700);">${formatCurrency(p.amount)}</span>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 20px; font-size: 0.75rem; color: var(--gray-400);">
+                            *** College MCA Demonstration Project — Not an actual monetary receipt ***
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error(err);
+                body.innerHTML = '<div class="alert alert-danger">Error retrieving receipt details.</div>';
+            }
+        }
+
+        function printReceipt() {
+            const printContent = document.getElementById('printableReceipt');
+            if (!printContent) return;
+            const originalContent = document.body.innerHTML;
+            window.print();
+        }
+    </script>
+</body>
+</html>

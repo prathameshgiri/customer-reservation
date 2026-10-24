@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="logo-text">ReserveEase <span>Admin Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="/admin/dashboard.html" class="nav-link active"><i class="fa-solid fa-chart-pie"></i><span class="nav-text">Dashboard</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <a href="/admin/reservations.html" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Reservations</span></a>
+                    <a href="/admin/services.html" class="nav-link"><i class="fa-solid fa-bell-concierge"></i><span class="nav-text">Services & Slots</span></a>
+                    <a href="/admin/customers.html" class="nav-link"><i class="fa-solid fa-users"></i><span class="nav-text">Customers</span></a>
+                    <a href="/admin/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="/admin/settings.html" class="nav-link"><i class="fa-solid fa-sliders"></i><span class="nav-text">Settings</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar" style="background: var(--primary-600); color: #fff;">A</div>
+                    <div class="sidebar-user-info"><div class="name">Administrator</div><div class="role">admin</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Executive Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <a href="/admin/services.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-plus"></i> Add Service</a>
+                    <a href="/admin/reservations.html?status=Pending" class="btn btn-primary btn-sm"><i class="fa-solid fa-bell"></i> Pending Bookings</a>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- KPI Stats Grid -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card primary">
+                        <div class="stat-info">
+                            <h4>Total Revenue</h4>
+                            <div class="stat-value" id="statRevenue">₹0</div>
+                            <div class="kpi-trend up"><i class="fa-solid fa-arrow-trend-up"></i> Verified Paid</div>
+                        </div>
+                        <div class="stat-icon primary"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    </div>
+
+                    <div class="stat-card info">
+                        <div class="stat-info">
+                            <h4>Total Reservations</h4>
+                            <div class="stat-value" id="statReservations">0</div>
+                            <div class="kpi-trend neutral" id="statTodayBookings"><i class="fa-solid fa-calendar-day"></i> 0 today</div>
+                        </div>
+                        <div class="stat-icon info"><i class="fa-solid fa-calendar-check"></i></div>
+                    </div>
+
+                    <div class="stat-card success">
+                        <div class="stat-info">
+                            <h4>Registered Customers</h4>
+                            <div class="stat-value" id="statCustomers">0</div>
+                            <div class="kpi-trend up" id="statActiveCustomers"><i class="fa-solid fa-user-check"></i> 0 active</div>
+                        </div>
+                        <div class="stat-icon success"><i class="fa-solid fa-users"></i></div>
+                    </div>
+
+                    <div class="stat-card warning">
+                        <div class="stat-info">
+                            <h4>Active Services</h4>
+                            <div class="stat-value" id="statServices">0</div>
+                            <div class="kpi-trend neutral"><i class="fa-solid fa-boxes-stacked"></i> Available now</div>
+                        </div>
+                        <div class="stat-icon warning"><i class="fa-solid fa-bell-concierge"></i></div>
+                    </div>
+                </div>
+
+                <!-- Secondary Quick Metrics Row -->
+                <div class="grid grid-4" style="gap: 16px; margin-bottom: 28px;">
+                    <div class="card" style="padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--gray-500); font-weight: 600; text-transform: uppercase;">Pending Approval</div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--warning-600);" id="statPendingCount">0</div>
+                        </div>
+                        <i class="fa-solid fa-hourglass-half" style="font-size: 1.5rem; color: var(--warning-500);"></i>
+                    </div>
+
+                    <div class="card" style="padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--gray-500); font-weight: 600; text-transform: uppercase;">Confirmed</div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary-600);" id="statConfirmedCount">0</div>
+                        </div>
+                        <i class="fa-solid fa-circle-check" style="font-size: 1.5rem; color: var(--primary-500);"></i>
+                    </div>
+
+                    <div class="card" style="padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--gray-500); font-weight: 600; text-transform: uppercase;">Completed</div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--success-600);" id="statCompletedCount">0</div>
+                        </div>
+                        <i class="fa-solid fa-flag-checkered" style="font-size: 1.5rem; color: var(--success-500);"></i>
+                    </div>
+
+                    <div class="card" style="padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--gray-500); font-weight: 600; text-transform: uppercase;">Cancelled</div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--danger-600);" id="statCancelledCount">0</div>
+                        </div>
+                        <i class="fa-solid fa-circle-xmark" style="font-size: 1.5rem; color: var(--danger-500);"></i>
+                    </div>
+                </div>
+
+                <!-- Interactive Charts Row -->
+                <div class="charts-grid">
+                    <!-- Monthly Booking & Revenue Trends -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title"><i class="fa-solid fa-chart-line" style="color: var(--primary-600);"></i> Monthly Booking Activity</div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="monthlyBookingsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Bookings Distribution by Status -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title"><i class="fa-solid fa-chart-pie" style="color: var(--navy-600);"></i> Bookings by Status</div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="statusDoughnutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Reservations Table Card -->
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Customer Reservations</h3>
+                        <a href="/admin/reservations.html" class="btn btn-outline btn-sm">View All Bookings <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container" id="recentReservationsTable">
+                            <div class="loading-spinner"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let bookingsChartInstance = null;
+        let statusChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            const user = await checkAuth('admin');
+            if (!user) return;
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            try {
+                const res = await API.get('/admin/dashboard');
+                if (!res.success) {
+                    showToast('Failed to load dashboard statistics', 'error');
+                    return;
+                }
+
+                const { stats, monthlyTrends, bookingsByStatus, recentReservations } = res;
+
+                // Update KPI Cards
+                document.getElementById('statRevenue').textContent = formatCurrency(stats.totalRevenue || 0);
+                document.getElementById('statReservations').textContent = stats.totalReservations || 0;
+                document.getElementById('statTodayBookings').innerHTML = `<i class="fa-solid fa-calendar-day"></i> ${stats.todaysReservations || 0} today`;
+                document.getElementById('statCustomers').textContent = stats.totalCustomers || 0;
+                document.getElementById('statActiveCustomers').innerHTML = `<i class="fa-solid fa-user-check"></i> ${stats.activeCustomers || 0} active`;
+                document.getElementById('statServices').textContent = stats.totalServices || 0;
+
+                document.getElementById('statPendingCount').textContent = stats.pendingReservations || 0;
+                document.getElementById('statConfirmedCount').textContent = stats.confirmedReservations || 0;
+                document.getElementById('statCompletedCount').textContent = stats.completedReservations || 0;
+                document.getElementById('statCancelledCount').textContent = stats.cancelledReservations || 0;
+
+                // Render Charts
+                renderMonthlyChart(monthlyTrends || []);
+                renderStatusChart(bookingsByStatus || {});
+
+                // Render Table
+                renderRecentTable(recentReservations || []);
+            } catch (err) {
+                console.error(err);
+                showToast('Error loading dashboard data', 'error');
+            }
+        }
+
+        function renderMonthlyChart(trends) {
+            const ctx = document.getElementById('monthlyBookingsChart').getContext('2d');
+            if (bookingsChartInstance) bookingsChartInstance.destroy();
+
+            const labels = trends.map(t => t.month);
+            const bookingData = trends.map(t => t.bookings);
+            const revenueData = trends.map(t => t.revenue);
+
+            bookingsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Bookings',
+                            data: bookingData,
+                            backgroundColor: 'rgba(79, 70, 229, 0.85)',
+                            borderRadius: 6,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Revenue (₹)',
+                            data: revenueData,
+                            type: 'line',
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { family: 'Inter' } } }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                callback: val => '₹' + val
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderStatusChart(statusData) {
+            const ctx = document.getElementById('statusDoughnutChart').getContext('2d');
+            if (statusChartInstance) statusChartInstance.destroy();
+
+            const labels = ['Pending', 'Confirmed', 'Completed', 'Cancelled'];
+            const data = [
+                statusData.Pending || 0,
+                statusData.Confirmed || 0,
+                statusData.Completed || 0,
+                statusData.Cancelled || 0
+            ];
+
+            const total = data.reduce((a, b) => a + b, 0);
+
+            statusChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: total === 0 ? [1, 0, 0, 0] : data,
+                        backgroundColor: total === 0 
+                            ? ['#e2e8f0', '#e2e8f0', '#e2e8f0', '#e2e8f0']
+                            : ['#f59e0b', '#4f46e5', '#10b981', '#ef4444'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter' } } }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        function renderRecentTable(list) {
+            const container = document.getElementById('recentReservationsTable');
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                        <h3>No Bookings Recorded</h3>
+                        <p>No customer reservations have been made in the system yet.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Booking Status</th>
+                            <th>Payment</th>
+                            <th class="actions-col" style="min-width: 110px; text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            list.forEach(r => {
+                const resBadge = getStatusBadge(r.reservationStatus);
+                const payBadge = getStatusBadge(r.paymentStatus);
+
+                html += `
+                    <tr>
+                        <td>
+                            <strong style="color: var(--primary-700); font-family: monospace;">${r.bookingId}</strong>
+                        </td>
+                        <td style="font-weight: 600; color: var(--gray-800);">${r.customerName}</td>
+                        <td>${r.serviceName}</td>
+                        <td style="font-size: 0.85rem; color: var(--gray-600);">${r.reservationDate}</td>
+                        <td style="font-weight: 700; color: var(--gray-900);">${formatCurrency(r.totalAmount)}</td>
+                        <td>${resBadge}</td>
+                        <td>${payBadge}</td>
+                        <td class="actions-cell" style="white-space: nowrap; min-width: 110px; text-align: center;">
+                            <a href="/admin/reservations.html?search=${encodeURIComponent(r.bookingId)}" class="btn btn-outline btn-sm">
+                                <i class="fa-solid fa-up-right-from-square"></i> Manage
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

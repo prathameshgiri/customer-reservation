@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Services - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="logo-text">ReserveEase <span>Customer Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <a href="/customer-dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span></a>
+                    <a href="/services.html" class="nav-link"><i class="fa-solid fa-concierge-bell"></i><span class="nav-text">Browse Services</span></a>
+                    <a href="/booking.html" class="nav-link"><i class="fa-solid fa-plus-circle"></i><span class="nav-text">Make Reservation</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">My Account</div>
+                    <a href="/my-reservations.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span class="nav-text">My Reservations</span></a>
+                    <a href="/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                    <a href="/profile.html" class="nav-link"><i class="fa-solid fa-user-gear"></i><span class="nav-text">Profile</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar">U</div>
+                    <div class="sidebar-user-info"><div class="name">User</div><div class="role">customer</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">Browse Services</h1>
+                </div>
+                <div class="header-right">
+                    <a href="/booking.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Book Now</a>
+                </div>
+            </header>
+            <div class="page-content">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="searchInput" placeholder="Search services...">
+                        </div>
+                        <select class="filter-select" id="categoryFilter">
+                            <option value="all">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="services-grid" id="servicesGrid">
+                    <div class="loading-spinner"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let allServices = [];
+        let allCategories = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            await checkAuth('customer');
+            loadServices();
+
+            document.getElementById('searchInput').addEventListener('input', debounce(filterServices, 300));
+            document.getElementById('categoryFilter').addEventListener('change', filterServices);
+        });
+
+        async function loadServices() {
+            const res = await API.get('/services');
+            if (!res.ok) {
+                showToast('Failed to load services', 'error');
+                return;
+            }
+
+            allServices = res.data.services;
+            allCategories = res.data.categories || [];
+
+            // Populate category filter
+            const catFilter = document.getElementById('categoryFilter');
+            allCategories.forEach(cat => {
+                catFilter.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+
+            renderServices(allServices);
+        }
+
+        function filterServices() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+
+            let filtered = allServices;
+            if (search) {
+                filtered = filtered.filter(s => s.name.toLowerCase().includes(search) || s.description.toLowerCase().includes(search));
+            }
+            if (category !== 'all') {
+                filtered = filtered.filter(s => s.category === category);
+            }
+
+            renderServices(filtered);
+        }
+
+        const serviceIcons = {
+            'Spa & Wellness': 'fa-spa',
+            'Dining': 'fa-utensils',
+            'Business': 'fa-briefcase',
+            'Recreation': 'fa-swimmer',
+            'Entertainment': 'fa-film',
+            'Creative': 'fa-camera',
+            'Events': 'fa-champagne-glasses'
+        };
+
+        const serviceGradients = [
+            'linear-gradient(135deg, #1e3a5f 0%, #4c6ef5 100%)',
+            'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+            'linear-gradient(135deg, #059669 0%, #34d399 100%)',
+            'linear-gradient(135deg, #dc2626 0%, #f87171 100%)',
+            'linear-gradient(135deg, #d97706 0%, #fbbf24 100%)',
+            'linear-gradient(135deg, #0891b2 0%, #67e8f9 100%)',
+            'linear-gradient(135deg, #be185d 0%, #f472b6 100%)',
+            'linear-gradient(135deg, #4338ca 0%, #818cf8 100%)'
+        ];
+
+        function renderServices(services) {
+            const grid = document.getElementById('servicesGrid');
+
+            if (services.length === 0) {
+                showEmpty(grid, 'fa-concierge-bell', 'No Services Found', 'Try adjusting your search or filters.');
+                return;
+            }
+
+            grid.innerHTML = services.map((s, i) => {
+                const icon = serviceIcons[s.category] || 'fa-concierge-bell';
+                const gradient = serviceGradients[i % serviceGradients.length];
+                return `
+                    <div class="service-card">
+                        <div class="service-card-image" style="background: ${gradient};">
+                            <i class="fa-solid ${icon}"></i>
+                            <span class="category-badge">${s.category}</span>
+                            <span class="price-badge">${formatCurrency(s.price)}</span>
+                        </div>
+                        <div class="service-card-body">
+                            <h3>${s.name}</h3>
+                            <p>${s.description}</p>
+                        </div>
+                        <div class="service-card-footer">
+                            <div class="service-meta">
+                                <span><i class="fa-solid fa-users"></i> ${s.capacity} spots</span>
+                                <span><i class="fa-solid fa-clock"></i> ${s.timeSlots ? s.timeSlots.length : 0} slots</span>
+                            </div>
+                            <a href="/booking.html?service=${s.id}" class="btn btn-primary btn-sm">Book</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

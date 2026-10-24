@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Profile - ReserveEase</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="logo-text">ReserveEase <span>Customer Portal</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <a href="/customer-dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span></a>
+                    <a href="/services.html" class="nav-link"><i class="fa-solid fa-concierge-bell"></i><span class="nav-text">Browse Services</span></a>
+                    <a href="/booking.html" class="nav-link"><i class="fa-solid fa-plus-circle"></i><span class="nav-text">Make Reservation</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">My Account</div>
+                    <a href="/my-reservations.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span class="nav-text">My Reservations</span></a>
+                    <a href="/payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="nav-text">Payments</span></a>
+                    <a href="/profile.html" class="nav-link active"><i class="fa-solid fa-user-gear"></i><span class="nav-text">Profile</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="avatar">U</div>
+                    <div class="sidebar-user-info"><div class="name">User</div><div class="role">customer</div></div>
+                    <button onclick="logout()" title="Logout" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 class="page-title">My Profile & Security</h1>
+                </div>
+                <div class="header-right">
+                    <button onclick="logout()" class="btn btn-outline btn-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                </div>
+            </header>
+
+            <div class="page-content" style="max-width: 900px; margin: 0 auto;">
+                <div class="grid grid-2" style="gap: 24px;">
+                    <!-- Personal Information Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-user"></i> Personal Details</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="profileForm">
+                                <div class="form-group">
+                                    <label class="form-label" for="profileName">Full Name *</label>
+                                    <input type="text" id="profileName" class="form-control" required placeholder="Your full name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="profileEmail">Email Address</label>
+                                    <input type="email" id="profileEmail" class="form-control" disabled style="background-color: var(--gray-100); cursor: not-allowed;">
+                                    <small style="color: var(--gray-500); font-size: 0.78rem;">Email address cannot be modified once registered.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="profilePhone">Mobile Number *</label>
+                                    <input type="tel" id="profilePhone" class="form-control" required placeholder="10-digit mobile number">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Account Created</label>
+                                    <div id="accountCreated" style="font-size: 0.9rem; color: var(--gray-700); padding: 8px 0;">--</div>
+                                </div>
+                                <div class="form-group" style="margin-top: 20px;">
+                                    <button type="submit" id="saveProfileBtn" class="btn btn-primary" style="width: 100%;">
+                                        <i class="fa-solid fa-floppy-disk"></i> Update Profile
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Security & Change Password Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-lock"></i> Change Password</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="passwordForm">
+                                <div class="form-group">
+                                    <label class="form-label" for="currentPassword">Current Password *</label>
+                                    <input type="password" id="currentPassword" class="form-control" required placeholder="Enter current password">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="newPassword">New Password *</label>
+                                    <input type="password" id="newPassword" class="form-control" required placeholder="Minimum 6 characters, with letters & numbers">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="confirmPassword">Confirm New Password *</label>
+                                    <input type="password" id="confirmPassword" class="form-control" required placeholder="Re-enter new password">
+                                </div>
+                                <div class="form-group" style="margin-top: 28px;">
+                                    <button type="submit" id="changePasswordBtn" class="btn btn-secondary" style="width: 100%;">
+                                        <i class="fa-solid fa-key"></i> Change Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Status Card -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                        <div>
+                            <div style="font-weight: 700; color: var(--gray-900);">Role & Permissions</div>
+                            <div style="font-size: 0.85rem; color: var(--gray-500);">Standard Customer Account with full reservation privileges.</div>
+                        </div>
+                        <div>
+                            <span class="badge badge-success"><i class="fa-solid fa-shield-check"></i> Active Customer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupSidebar();
+            await checkAuth('customer');
+            loadProfile();
+
+            document.getElementById('profileForm').addEventListener('submit', handleProfileUpdate);
+            document.getElementById('passwordForm').addEventListener('submit', handlePasswordChange);
+        });
+
+        async function loadProfile() {
+            try {
+                const res = await API.get('/api/customer/profile');
+                if (res.success && res.user) {
+                    const u = res.user;
+                    document.getElementById('profileName').value = u.fullName || '';
+                    document.getElementById('profileEmail').value = u.email || '';
+                    document.getElementById('profilePhone').value = u.phone || '';
+                    document.getElementById('accountCreated').textContent = u.createdAt ? formatDateTime(u.createdAt) : 'N/A';
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load profile details', 'error');
+            }
+        }
+
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveProfileBtn');
+            const fullName = document.getElementById('profileName').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+
+            if (!fullName || fullName.length < 2) {
+                showToast('Name must be at least 2 characters long', 'warning');
+                return;
+            }
+
+            if (!phone || phone.length < 10) {
+                showToast('Please enter a valid 10-digit mobile number', 'warning');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></span> Saving...';
+
+            try {
+                const res = await API.put('/api/customer/profile', { fullName, phone });
+                if (res.success) {
+                    showToast('Profile updated successfully!', 'success');
+                    // Update user name in local storage/sidebar if applicable
+                    const user = getCurrentUser();
+                    if (user) {
+                        user.fullName = fullName;
+                        user.phone = phone;
+                        localStorage.setItem('user', JSON.stringify(user));
+                        populateSidebarUser(user);
+                    }
+                } else {
+                    showToast(res.message || 'Failed to update profile', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while updating profile', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Profile';
+            }
+        }
+
+        async function handlePasswordChange(e) {
+            e.preventDefault();
+            const btn = document.getElementById('changePasswordBtn');
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showToast('New passwords do not match', 'warning');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showToast('New password must be at least 6 characters long', 'warning');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></span> Updating...';
+
+            try {
+                const res = await API.put('/api/customer/password', {
+                    currentPassword,
+                    newPassword,
+                    confirmPassword
+                });
+
+                if (res.success) {
+                    showToast('Password changed successfully!', 'success');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    showToast(res.message || 'Failed to change password', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while changing password', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-key"></i> Change Password';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+[
+  {
+    "id": "dd345289-0133-4e73-8c7f-28dabaddfc31",
+    "name": "Luxury Spa Treatment",
+    "description": "Indulge in our premium spa experience with full-body massage, aromatherapy, and relaxation therapy. Perfect for stress relief and rejuvenation.",
+    "category": "Spa & Wellness",
+    "price": 2500,
+    "image": "",
+    "capacity": 5,
+    "availableDates": [],
+    "timeSlots": [
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00"
+    ],
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.274Z",
+    "updatedAt": "2026-10-23T15:13:42.274Z"
+  },
+  {
+    "id": "df064b98-cf6c-4bb3-8f38-80021e857a50",
+    "name": "Fine Dining Experience",
+    "description": "Enjoy an exclusive dining experience with a curated multi-course menu prepared by our award-winning chef. Includes wine pairing and personalized service.",
+    "category": "Dining",
+    "price": 3500,
+    "image": "",
+    "capacity": 20,
+    "availableDates": [],
+    "timeSlots": [
+      "12:00",
+      "13:00",
+      "14:00",
+      "19:00",
+      "20:00",
+      "21:00"
+    ],
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.274Z",
+    "updatedAt": "2026-10-23T15:13:42.274Z"
+  },
+  {
+    "id": "aa0c878d-e521-443e-87ee-1d9fce879373",
+    "name": "Conference Room Booking",
+    "description": "Modern conference room with projector, whiteboard, high-speed Wi-Fi, and seating for up to 30 people. Ideal for meetings and presentations.",
+    "category": "Business",
+    "price": 5000,
+    "image": "",
+    "capacity": 3,
+    "availableDates": [],
+    "timeSlots": [
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00"
+    ],
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.274Z",
+    "updatedAt": "2026-10-23T15:13:42.274Z"
+  },
+  {
+    "id": "4d116526-fd47-40de-b4e2-50cfa4344a18",
+    "name": "Yoga & Meditation Session",
+    "description": "Join our expert instructors for guided yoga and meditation sessions. Suitable for beginners and advanced practitioners.",
+    "category": "Spa & Wellness",
+    "price": 800,
+    "image": "",
+    "capacity": 15,
+    "availableDates": [],
+    "timeSlots": [
+      "06:00",
+      "07:00",
+      "08:00",
+      "17:00",
+      "18:00"
+    ],
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.274Z",
+    "updatedAt": "2026-10-23T15:13:42.274Z"
+  },
+  {
+    "id": "cf84a2ca-723b-4d39-a365-6ed2f0270f52",
+    "name": "Swimming Pool Access",
+    "description": "Enjoy our temperature-controlled Olympic-size pool with dedicated lanes, locker facilities, and poolside refreshments included.",
+    "category": "Recreation",
+    "price": 500,
+    "image": "",
+    "capacity": 25,
+    "availableDates": [],
+    "timeSlots": [
+      "06:00",
+      "07:00",
+      "08:00",
+      "09:00",
+      "10:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+      "18:00"
+    ],
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.274Z",
+    "updatedAt": "2026-10-23T15:13:42.274Z"
+  },
+  {
+    "id": "46076abf-12ff-4a74-89c8-afdcaba27dce",
+    "name": "Private Movie Screening",
+    "description": "Book our private screening room with Dolby surround sound, 4K projector, luxury recliners, and complimentary popcorn and beverages.",
+    "category": "Entertainment",
+    "price": 8000,
+    "image": "",
+    "capacity": 2,
+    "availableDates": [],
+    "timeSlots": [
+      "10:00",
+      "13:00",
+      "16:00",
+      "19:00"
+    ],
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.274Z",
+    "updatedAt": "2026-10-23T15:13:42.274Z"
+  },
+  {
+    "id": "ce80e636-b4b4-4c5c-87b3-7c5d5734cd5b",
+    "name": "Photography Studio",
+    "description": "Professional photography studio with multiple backdrop options, studio lighting, and props. Photographer available on request.",
+    "category": "Creative",
+    "price": 3000,
+    "image": "",
+    "capacity": 4,
+    "availableDates": [],
+    "timeSlots": [
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "14:00",
+      "15:00",
+      "16:00"
+    ],
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.274Z",
+    "updatedAt": "2026-10-23T15:13:42.274Z"
+  },
+  {
+    "id": "2ae29bbe-3a24-4505-9837-131f2bd61321",
+    "name": "Banquet Hall",
+    "description": "Spacious and elegantly decorated banquet hall perfect for weddings, receptions, and corporate events. Accommodates up to 200 guests.",
+    "category": "Events",
+    "price": 25000,
+    "image": "",
+    "capacity": 3,
+    "availableDates": [],
+    "timeSlots": [
+      "10:00",
+      "14:00",
+      "18:00"
+    ],
+    "isActive": true,
+    "createdAt": "2026-10-23T15:13:42.274Z",
+    "updatedAt": "2026-10-23T15:13:42.274Z"
+  }
+]
